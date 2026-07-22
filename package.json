@@ -1,0 +1,16 @@
+{
+  "name": "inspiration-canvas",
+  "version": "1.0.0",
+  "private": true,
+  "description": "灵感画布 - 在线设计协作平台",
+  "scripts": {
+    "dev": "pnpm -r --parallel dev",
+    "dev:web": "pnpm --filter @inspiration/web dev",
+    "dev:server": "pnpm --filter @inspiration/server dev",
+    "build": "pnpm -r build",
+    "build:web": "pnpm --filter @inspiration/web build",
+    "build:server": "pnpm --filter @inspiration/server build",
+    "start": "pnpm --filter @inspiration/server start",
+    "preview": "pnpm --filter @inspiration/web preview"
+  }
+}

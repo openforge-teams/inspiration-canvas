@@ -1,0 +1,23 @@
+node_modules
+dist
+.DS_Store
+*.log
+.env
+.env.local
+.vscode
+coverage
+.turbo
+
+# pnpm
+.pnpm-store
+pnpm-lock.yaml
+
+# build outputs
+apps/*/dist
+apps/*/.next
+packages/*/dist
+
+# IDE
+.idea
+*.swp
+*.swo
