@@ -1,22 +1,39 @@
 import { useState } from 'react';
-import { Palette, Image, Layers } from 'lucide-react';
+import {
+  Palette,
+  Image,
+  Layers,
+  BookOpen,
+  Music,
+  MessageCircle,
+  Frame,
+  BarChart3,
+  LineChart,
+  Newspaper,
+  MonitorPlay,
+  Globe,
+  Camera,
+  Users,
+  Twitter,
+} from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import { NumberInput } from '../common/NumberInput';
 import { ColorPicker } from '../common/ColorPicker';
 import { useDesignStore } from '@/store/useDesignStore';
 
-const SIZE_PRESETS = [
-  { name: '小红书', width: 1080, height: 1440, icon: '📕' },
-  { name: '抖音', width: 1080, height: 1920, icon: '🎵' },
-  { name: '微信朋友圈', width: 1080, height: 1080, icon: '💬' },
-  { name: '海报', width: 750, height: 1334, icon: '🖼️' },
-  { name: 'PPT 16:9', width: 1920, height: 1080, icon: '📊' },
-  { name: 'PPT 4:3', width: 1440, height: 1080, icon: '📈' },
-  { name: '公众号封面', width: 900, height: 383, icon: '📰' },
-  { name: 'B 站封面', width: 1146, height: 717, icon: '📺' },
-  { name: '微博', width: 1080, height: 1080, icon: '🌐' },
-  { name: 'Instagram', width: 1080, height: 1080, icon: '📸' },
-  { name: 'Facebook', width: 1200, height: 630, icon: '👥' },
-  { name: 'Twitter/X', width: 1200, height: 675, icon: '🐦' },
+const SIZE_PRESETS: Array<{ name: string; width: number; height: number; icon: LucideIcon }> = [
+  { name: '小红书', width: 1080, height: 1440, icon: BookOpen },
+  { name: '抖音', width: 1080, height: 1920, icon: Music },
+  { name: '微信朋友圈', width: 1080, height: 1080, icon: MessageCircle },
+  { name: '海报', width: 750, height: 1334, icon: Frame },
+  { name: 'PPT 16:9', width: 1920, height: 1080, icon: BarChart3 },
+  { name: 'PPT 4:3', width: 1440, height: 1080, icon: LineChart },
+  { name: '公众号封面', width: 900, height: 383, icon: Newspaper },
+  { name: 'B 站封面', width: 1146, height: 717, icon: MonitorPlay },
+  { name: '微博', width: 1080, height: 1080, icon: Globe },
+  { name: 'Instagram', width: 1080, height: 1080, icon: Camera },
+  { name: 'Facebook', width: 1200, height: 630, icon: Users },
+  { name: 'Twitter/X', width: 1200, height: 675, icon: Twitter },
 ];
 
 const GRADIENT_PRESETS = [
@@ -108,19 +125,22 @@ export function DesignProperties() {
 
         {/* 预设尺寸网格 */}
         <div className="grid grid-cols-3 gap-2">
-          {SIZE_PRESETS.map((preset) => (
+          {SIZE_PRESETS.map((preset) => {
+            const Icon = preset.icon;
+            return (
             <button
               key={preset.name}
               onClick={() => handlePresetSize(preset.width, preset.height)}
               className="flex flex-col items-center p-2 rounded-lg border border-gray-200 hover:border-primary-400 hover:bg-primary-50 transition-colors text-left"
             >
-              <span className="text-lg mb-1">{preset.icon}</span>
+              <Icon className="w-5 h-5 mb-1" />
               <span className="text-xs font-medium text-gray-700">{preset.name}</span>
               <span className="text-[10px] text-gray-400">
                 {preset.width}×{preset.height}
               </span>
             </button>
-          ))}
+            );
+          })}
         </div>
 
         {/* 自定义尺寸 */}
