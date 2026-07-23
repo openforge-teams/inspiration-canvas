@@ -27,6 +27,31 @@
 
 ---
 
+## 产品预览
+
+<p align="center">
+  <strong>所见即所得的专业级设计体验</strong>
+</p>
+
+<table>
+  <tr>
+    <td width="50%">
+      <p align="center"><strong>整洁的编辑界面</strong></p>
+      <a href="docs/screenshots/main-interface.png">
+        <img src="docs/screenshots/main-interface.png" alt="主界面预览" border="0" />
+      </a>
+    </td>
+    <td width="50%">
+      <p align="center"><strong>自由的创作体验</strong></p>
+      <a href="docs/screenshots/editing-interface.png">
+        <img src="docs/screenshots/editing-interface.png" alt="编辑界面预览" border="0" />
+      </a>
+    </td>
+  </tr>
+</table>
+
+---
+
 ## 产品理念
 
 灵感画布不是另一个 Photoshop。它是为非设计人员打造的创作引擎——把设计决策拆解为**模板 + 素材 + 编辑器**三段式，让每个人都能在 5 分钟内产出专业级视觉内容。
