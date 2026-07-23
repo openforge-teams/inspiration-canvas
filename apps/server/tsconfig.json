@@ -2,6 +2,8 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "./dist",
+    "noEmit": false,
+    "allowImportingTsExtensions": false,
     "module": "ESNext",
     "moduleResolution": "bundler",
     "esModuleInterop": true,

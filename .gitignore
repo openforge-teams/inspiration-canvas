@@ -21,3 +21,5 @@ packages/*/dist
 .idea
 *.swp
 *.swo
+*.tsbuildinfo
+.uploads/

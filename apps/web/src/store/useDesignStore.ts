@@ -303,7 +303,7 @@ export const useDesignStore = create<DesignStore>((set, get) => ({
       const index = elements.findIndex((el) => el.id === id);
       if (index === -1) return {};
 
-      const sorted = elements.sort((a, b) => a.zIndex - b.zIndex);
+      const sorted = [...elements].sort((a, b) => a.zIndex - b.zIndex);
       const sortedIndex = sorted.findIndex((el) => el.id === id);
 
       if (direction === 'up' && sortedIndex < sorted.length - 1) {
