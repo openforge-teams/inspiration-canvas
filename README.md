@@ -105,26 +105,52 @@
 
 ## 技术架构
 
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│                              客户端层                                 │
-│   React 18 · TypeScript · Vite · Konva.js · Zustand · Tailwind     │
-├─────────────────────────────────────────────────────────────────────┤
-│                           实时通信层                                   │
-│                    WebSocket (协作同步 / 光标广播)                    │
-├─────────────────────────────────────────────────────────────────────┤
-│                            API 网关层                                  │
-│                 REST API · 会话管理 · 文件上传                        │
-├─────────────────────────────────────────────────────────────────────┤
-│                            业务服务层                                  │
-│   用户服务 · 模板服务 · 素材服务 · 协作服务 · 导出服务 · 品牌服务    │
-├─────────────────────────────────────────────────────────────────────┤
-│                            中间件层                                    │
-│            Redis (缓存 / 会话) · MQ (异步任务队列)                   │
-├─────────────────────────────────────────────────────────────────────┤
-│                            存储层                                      │
-│       PostgreSQL (元数据) · 对象存储 (素材) · CDN (边缘分发)         │
-└─────────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    subgraph Layer7["存储层"]
+        direction LR
+        PG["PostgreSQL<br/><small>元数据</small>"]
+        OS["对象存储<br/><small>素材</small>"]
+        CDN["CDN<br/><small>边缘分发</small>"]
+    end
+
+    subgraph Layer6["中间件层"]
+        direction LR
+        Redis["Redis<br/><small>缓存 / 会话</small>"]
+        MQ["消息队列<br/><small>异步任务</small>"]
+    end
+
+    subgraph Layer5["业务服务层"]
+        direction LR
+        S1["用户服务"]
+        S2["模板服务"]
+        S3["素材服务"]
+        S4["协作服务"]
+        S5["导出服务"]
+        S6["品牌服务"]
+    end
+
+    subgraph Layer4["API 网关层"]
+        REST["REST API · 会话管理 · 文件上传"]
+    end
+
+    subgraph Layer3["实时通信层"]
+        WS["WebSocket · 协作同步 · 光标广播"]
+    end
+
+    subgraph Layer2["客户端层"]
+        Client["React 18 · TypeScript · Vite · Konva.js · Zustand · Tailwind"]
+    end
+
+    Layer2 --> Layer3
+    Layer2 --> Layer4
+    Layer3 --> Layer4
+    Layer4 --> Layer5
+    Layer5 --> Layer6
+    Layer6 --> Layer7
+
+    classDef layer fill:#f8fafc,stroke:#e2e8f0,stroke-width:1px;
+    class Layer2,Layer3,Layer4,Layer5,Layer6,Layer7 layer;
 ```
 
 ### 技术选型
