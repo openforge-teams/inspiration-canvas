@@ -1,0 +1,11 @@
+node_modules
+dist
+.DS_Store
+.git
+*.log
+.env
+.env.local
+uploads
+docs/screenshots
+turbo
+pnpm-lock.yaml

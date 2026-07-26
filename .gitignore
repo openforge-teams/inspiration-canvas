@@ -10,12 +10,17 @@ coverage
 
 # pnpm
 .pnpm-store
-pnpm-lock.yaml
 
 # build outputs
 apps/*/dist
 apps/*/.next
 packages/*/dist
+
+# uploads
+.uploads/
+
+# Docker
+.docker/
 
 # IDE
 .idea
