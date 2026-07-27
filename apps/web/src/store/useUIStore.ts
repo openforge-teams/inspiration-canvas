@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 
 export type ActiveTool = 'select' | 'text' | 'image' | 'shape' | 'line';
-export type ActivePanel = 'elements' | 'templates' | 'assets' | 'pages' | null;
+export type ActivePanel = 'templates' | 'assets' | 'pages' | 'text' | 'shapes' | null;
 export type RightTabType = 'design' | 'layers';
 
 // 类型别名兼容
@@ -28,7 +28,7 @@ export type UIStore = UIState & UIActions;
 
 export const useUIStore = create<UIStore>((set) => ({
   activeTool: 'select',
-  activePanel: 'elements',
+  activePanel: null,
   showExportModal: false,
   selectedElementId: null,
   rightTab: 'design',
