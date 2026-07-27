@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Palette,
   Image,
@@ -56,6 +56,23 @@ export function DesignProperties() {
   );
   const [customWidth, setCustomWidth] = useState(design.width);
   const [customHeight, setCustomHeight] = useState(design.height);
+  const [imageUrl, setImageUrl] = useState(design.background.image || '');
+
+  // 当设计尺寸变化时（如应用模板、点击预设尺寸），同步自定义尺寸输入框
+  useEffect(() => {
+    setCustomWidth(design.width);
+    setCustomHeight(design.height);
+  }, [design.width, design.height]);
+
+  // 当背景类型变化时，同步本地状态
+  useEffect(() => {
+    setBgType((design.background.type as BgType) || 'solid');
+  }, [design.background.type]);
+
+  // 当背景图片变化时（如应用模板、撤销重做），同步本地输入框
+  useEffect(() => {
+    setImageUrl(design.background.image || '');
+  }, [design.background.image]);
 
   const handlePresetSize = (width: number, height: number) => {
     setCustomWidth(width);
@@ -83,6 +100,37 @@ export function DesignProperties() {
         angle: 135,
       },
     });
+  };
+
+  const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const src = reader.result as string;
+      setImageUrl(src);
+      setBackground({ type: 'image', image: src });
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  };
+
+  const handleImageUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setImageUrl(e.target.value);
+  };
+
+  const applyImageUrl = () => {
+    const trimmed = imageUrl.trim();
+    if (trimmed) {
+      setBackground({ type: 'image', image: trimmed });
+    }
+  };
+
+  const handleImageUrlKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      applyImageUrl();
+    }
   };
 
   const getBgPreviewStyle = () => {
@@ -246,16 +294,31 @@ export function DesignProperties() {
         {/* 图片背景 */}
         {bgType === 'image' && (
           <div className="space-y-2">
+            {design.background.image && (
+              <div
+                className="w-full h-24 rounded-md border border-gray-200 bg-cover bg-center"
+                style={{ backgroundImage: `url(${design.background.image})` }}
+              />
+            )}
             <div className="flex items-center justify-center w-full h-20 bg-gray-50 border border-dashed border-gray-200 rounded-md">
               <label className="cursor-pointer text-sm text-primary-600 hover:text-primary-700 flex items-center gap-1">
                 <Image className="w-4 h-4" />
                 上传背景图片
-                <input type="file" accept="image/*" className="hidden" />
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleImageFileChange}
+                />
               </label>
             </div>
             <input
               type="text"
-              placeholder="或输入图片 URL"
+              value={imageUrl}
+              onChange={handleImageUrlChange}
+              onKeyDown={handleImageUrlKeyDown}
+              onBlur={applyImageUrl}
+              placeholder="或输入图片 URL，按回车应用"
               className="w-full h-8 px-2 text-sm border border-gray-200 rounded-md focus:outline-none focus:border-primary-500 bg-white"
             />
           </div>

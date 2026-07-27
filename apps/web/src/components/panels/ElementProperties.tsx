@@ -327,7 +327,22 @@ function ImageProperties({
       <div className="flex items-center justify-center w-full h-24 bg-gray-50 border border-dashed border-gray-200 rounded-md">
         <label className="cursor-pointer text-sm text-primary-600 hover:text-primary-700">
           点击上传图片
-          <input type="file" accept="image/*" className="hidden" />
+          <input
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (!file) return;
+              const reader = new FileReader();
+              reader.onload = () => {
+                onChange('src', reader.result as string);
+              };
+              reader.readAsDataURL(file);
+              // 重置 input 以便重复选择同一文件
+              e.target.value = '';
+            }}
+          />
         </label>
       </div>
 

@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState } from 'react';
-import { Group, Text, Rect } from 'react-konva';
+import { Group, Text } from 'react-konva';
 import type Konva from 'konva';
 import type { CanvasElement, TextElementProps } from '@inspiration/shared';
 import { useDesignStore } from '@/store/useDesignStore';

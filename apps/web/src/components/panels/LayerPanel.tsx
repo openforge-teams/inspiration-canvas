@@ -47,7 +47,7 @@ function getTypeLabel(type: CanvasElement['type']) {
 }
 
 export function LayerPanel() {
-  const { design, updateElement, deleteElement, duplicateElement, moveElementZIndex } =
+  const { design, updateElement, deleteElement, duplicateElement, moveElementZIndex, setSelectedIds } =
     useDesignStore();
   const { selectedElementId, setSelectedElementId } = useUIStore();
 
@@ -65,6 +65,7 @@ export function LayerPanel() {
 
   const handleSelect = (element: CanvasElement) => {
     setSelectedElementId(element.id);
+    setSelectedIds([element.id]);
   };
 
   if (sortedElements.length === 0) {
@@ -174,6 +175,9 @@ export function LayerPanel() {
                   onClick={(e) => {
                     e.stopPropagation();
                     deleteElement(element.id);
+                    if (selectedElementId === element.id) {
+                      setSelectedElementId(null);
+                    }
                   }}
                   className="p-1 rounded hover:bg-red-100 text-gray-400 hover:text-red-500"
                   title="删除"

@@ -27,4 +27,3 @@ packages/*/dist
 *.swp
 *.swo
 *.tsbuildinfo
-.uploads/

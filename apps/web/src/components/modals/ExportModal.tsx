@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { useUIStore } from '@/store/useUIStore';
 import { useDesignStore } from '@/store/useDesignStore';
+import { getStage } from '@/store/stageRef';
 import type { ExportFormat } from '@inspiration/shared';
 
 interface FormatOption {
@@ -52,47 +53,68 @@ export function ExportModal() {
       // 等待下一帧确保画布渲染完成
       await new Promise((resolve) => requestAnimationFrame(() => resolve(null)));
 
-      // 获取 Konva stage 的引用（通过 DOM 查找）
-      const stageContainer = document.querySelector('.konvajs-content');
-      const canvas = stageContainer?.querySelector('canvas');
-
-      if (!canvas) {
-        throw new Error('无法获取画布元素');
+      const stage = getStage();
+      if (!stage) {
+        throw new Error('无法获取画布实例');
       }
 
       const marginPx = includeMargin ? margin * scale : 0;
+      const exportW = design.width * scale + marginPx * 2;
+      const exportH = design.height * scale + marginPx * 2;
 
-      // 创建一个新的 canvas 用于导出
+      // 使用 Konva 的 toDataURL 方法精确导出设计区域
+      // 这会以指定的 pixelRatio 渲染整个设计画布，不受视口缩放/位置影响
+      const designDataUrl = stage.toDataURL({
+        x: 0,
+        y: 0,
+        width: design.width,
+        height: design.height,
+        pixelRatio: scale,
+        mimeType: format === 'jpg' ? 'image/jpeg' : 'image/png',
+        quality: format === 'jpg' ? quality / 100 : undefined,
+      });
+
+      // 如果不需要边距且格式为 PNG/JPG，直接下载 Konva 生成的图片
+      if (marginPx === 0 && (format === 'png' || format === 'jpg')) {
+        const filename = `${design.title || 'design'}.${format}`;
+        const link = document.createElement('a');
+        link.download = filename;
+        link.href = designDataUrl;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        setIsExporting(false);
+        handleClose();
+        return;
+      }
+
+      // 需要边距或透明背景处理：创建合成 canvas
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      await new Promise((resolve, reject) => {
+        img.onload = resolve;
+        img.onerror = reject;
+        img.src = designDataUrl;
+      });
+
       const exportCanvas = document.createElement('canvas');
       const ctx = exportCanvas.getContext('2d');
       if (!ctx) throw new Error('无法创建导出画布');
 
-      const exportW = design.width * scale + marginPx * 2;
-      const exportH = design.height * scale + marginPx * 2;
-
       exportCanvas.width = exportW;
       exportCanvas.height = exportH;
 
-      // 绘制背景（非透明时）
-      if (!transparent && (format === 'png' || format === 'svg')) {
-        ctx.fillStyle = design.background.type === 'solid' 
+      // 绘制背景（透明选项处理）
+      const shouldFillBg = !transparent || format === 'jpg';
+      if (shouldFillBg) {
+        ctx.fillStyle = design.background.type === 'solid'
           ? (design.background.color || '#FFFFFF')
           : '#FFFFFF';
         ctx.fillRect(0, 0, exportW, exportH);
-      } else if (format === 'jpg') {
-        // JPG 不支持透明，总是填充白色
-        ctx.fillStyle = '#FFFFFF';
-        ctx.fillRect(0, 0, exportW, exportH);
       }
 
-      // 绘制原始画布内容（带缩放）
-      ctx.drawImage(
-        canvas,
-        marginPx,
-        marginPx,
-        design.width * scale,
-        design.height * scale
-      );
+      // 绘制设计内容（带边距）
+      ctx.drawImage(img, marginPx, marginPx, design.width * scale, design.height * scale);
 
       // 根据格式导出
       let dataUrl: string;
@@ -106,9 +128,10 @@ export function ExportModal() {
         filename = `${design.title || 'design'}.jpg`;
       } else if (format === 'svg') {
         // SVG 导出：创建一个包含 canvas 图像的 SVG
+        const pngDataUrl = exportCanvas.toDataURL('image/png');
         const svgContent = `<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="${exportW}" height="${exportH}" viewBox="0 0 ${exportW} ${exportH}">
-  <image href="${exportCanvas.toDataURL('image/png')}" width="${exportW}" height="${exportH}"/>
+  <image href="${pngDataUrl}" width="${exportW}" height="${exportH}"/>
 </svg>`;
         dataUrl = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgContent);
         filename = `${design.title || 'design'}.svg`;
@@ -116,12 +139,12 @@ export function ExportModal() {
         // 动态导入 jsPDF
         const { default: jsPDF } = await import('jspdf');
         const pdf = new jsPDF({
-          orientation: design.width > design.height ? 'landscape' : 'portrait',
+          orientation: exportW > exportH ? 'landscape' : 'portrait',
           unit: 'px',
-          format: [design.width * scale + marginPx * 2, design.height * scale + marginPx * 2],
+          format: [exportW, exportH],
         });
         const imgData = exportCanvas.toDataURL('image/jpeg', quality / 100);
-        pdf.addImage(imgData, 'JPEG', 0, 0, design.width * scale + marginPx * 2, design.height * scale + marginPx * 2);
+        pdf.addImage(imgData, 'JPEG', 0, 0, exportW, exportH);
         pdf.save(`${design.title || 'design'}.pdf`);
         setIsExporting(false);
         handleClose();

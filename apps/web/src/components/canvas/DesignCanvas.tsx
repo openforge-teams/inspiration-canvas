@@ -1,8 +1,10 @@
 import { useRef, useEffect, useState, useCallback } from 'react';
-import { Stage, Layer, Rect, Line } from 'react-konva';
+import { Stage, Layer, Rect, Line, Image as KonvaImage } from 'react-konva';
+import useImage from 'use-image';
 import type Konva from 'konva';
 import { useDesignStore } from '@/store/useDesignStore';
 import { useUIStore } from '@/store/useUIStore';
+import { setStage } from '@/store/stageRef';
 import type { CanvasElement, ElementType } from '@inspiration/shared';
 import { createDefaultElement } from '@inspiration/shared';
 import { CanvasText } from './CanvasText';
@@ -14,6 +16,22 @@ import { SelectionTransformer } from './SelectionTransformer';
 interface GuideLines {
   vertical: number[];
   horizontal: number[];
+}
+
+// 背景图片图层：异步加载图片并平铺到画布尺寸
+function BackgroundImageLayer({ src, width, height }: { src: string; width: number; height: number }) {
+  const [image] = useImage(src, 'anonymous');
+  if (!image) return null;
+  return (
+    <KonvaImage
+      image={image}
+      x={0}
+      y={0}
+      width={width}
+      height={height}
+      listening={false}
+    />
+  );
 }
 
 export function DesignCanvas() {
@@ -34,7 +52,7 @@ export function DesignCanvas() {
     deleteElement,
     addElement,
   } = useDesignStore();
-  const { activeTool, setActiveTool } = useUIStore();
+  const { activeTool, setActiveTool, setSelectedElementId } = useUIStore();
 
   const [stageSize, setStageSize] = useState({ width: 800, height: 600 });
   const [isPanning, setIsPanning] = useState(false);
@@ -44,8 +62,9 @@ export function DesignCanvas() {
     horizontal: [],
   });
 
-  // 监听容器尺寸变化，初始化时自动适配画布
+  // 监听容器尺寸变化，初始化及设计尺寸变化时自动适配画布
   const hasInitializedRef = useRef(false);
+  const prevDesignSizeRef = useRef({ width: design.width, height: design.height });
   useEffect(() => {
     const updateSize = () => {
       if (containerRef.current) {
@@ -56,9 +75,16 @@ export function DesignCanvas() {
           height: newHeight,
         });
 
-        // 初始化时自动计算合适的缩放以适应视口
-        if (!hasInitializedRef.current && newWidth > 0 && newHeight > 0) {
+        // 自动计算合适的缩放以适应视口
+        // 1. 初始化时自动适配
+        // 2. 设计尺寸变化时（如应用模板、更改画布尺寸）自动适配
+        const designSizeChanged =
+          prevDesignSizeRef.current.width !== design.width ||
+          prevDesignSizeRef.current.height !== design.height;
+
+        if (newWidth > 0 && newHeight > 0 && (!hasInitializedRef.current || designSizeChanged)) {
           hasInitializedRef.current = true;
+          prevDesignSizeRef.current = { width: design.width, height: design.height };
           const padding = 80;
           const scaleX = (newWidth - padding) / design.width;
           const scaleY = (newHeight - padding) / design.height;
@@ -83,6 +109,12 @@ export function DesignCanvas() {
       observer.disconnect();
     };
   }, [design.width, design.height, design.zoom, setZoom]);
+
+  // 注册 stage 引用供其他组件（如 ExportModal）使用
+  useEffect(() => {
+    setStage(stageRef.current);
+    return () => setStage(null);
+  }, []);
 
   // 键盘事件监听（空格键平移 + 快捷键）
   useEffect(() => {
@@ -117,11 +149,13 @@ export function DesignCanvas() {
       if ((e.key === 'Delete' || e.key === 'Backspace') && selectedIds.length > 0) {
         e.preventDefault();
         selectedIds.forEach((id) => deleteElement(id));
+        useUIStore.getState().setSelectedElementId(null);
       }
 
       // Escape 取消选中
       if (e.key === 'Escape') {
         deselectAll();
+        useUIStore.getState().setSelectedElementId(null);
       }
 
       // Ctrl/Cmd + A 全选
@@ -129,6 +163,7 @@ export function DesignCanvas() {
         e.preventDefault();
         const allIds = design.elements.map((el) => el.id);
         useDesignStore.getState().setSelectedIds(allIds);
+        useUIStore.getState().setSelectedElementId(null);
       }
     };
 
@@ -234,8 +269,9 @@ export function DesignCanvas() {
       }
 
       clearSelection();
+      setSelectedElementId(null);
     },
-    [activeTool, addElement, clearSelection, setActiveTool]
+    [activeTool, addElement, clearSelection, setActiveTool, setSelectedElementId]
   );
 
   // 鼠标按下 - 开始平移
@@ -344,6 +380,25 @@ export function DesignCanvas() {
     [design.elements, design.width, design.height],
   );
 
+  // 拖拽元素时实时计算并显示智能参考线
+  const handleDragMove = useCallback(
+    (e: Konva.KonvaEventObject<DragEvent>) => {
+      const target = e.target;
+      const id = target.id();
+      if (!id) return;
+      const element = design.elements.find((el) => el.id === id);
+      if (!element) return;
+      const guides = calculateGuideLines(element, target.x(), target.y());
+      setGuideLines(guides);
+    },
+    [design.elements, calculateGuideLines],
+  );
+
+  // 拖拽结束清除参考线
+  const handleDragEnd = useCallback(() => {
+    setGuideLines({ vertical: [], horizontal: [] });
+  }, []);
+
   // 选中元素
   const handleSelect = useCallback(
     (elementId: string, e: Konva.KonvaEventObject<MouseEvent>) => {
@@ -353,15 +408,20 @@ export function DesignCanvas() {
         // Shift 多选
         const isSelected = selectedIds.includes(elementId);
         if (isSelected) {
-          setSelectedIds(selectedIds.filter((id) => id !== elementId));
+          const newIds = selectedIds.filter((id) => id !== elementId);
+          setSelectedIds(newIds);
+          setSelectedElementId(newIds.length === 1 ? newIds[0] : null);
         } else {
-          setSelectedIds([...selectedIds, elementId]);
+          const newIds = [...selectedIds, elementId];
+          setSelectedIds(newIds);
+          setSelectedElementId(newIds.length === 1 ? newIds[0] : null);
         }
       } else {
         setSelectedIds([elementId]);
+        setSelectedElementId(elementId);
       }
     },
-    [selectedIds, setSelectedIds],
+    [selectedIds, setSelectedIds, setSelectedElementId],
   );
 
   // 渲染元素
@@ -493,6 +553,29 @@ export function DesignCanvas() {
           />
         );
         break;
+      case 'image':
+        // 白色底色，避免透明 PNG 出现透明背景
+        bgElements.push(
+          <Rect
+            key="canvas-bg"
+            x={0}
+            y={0}
+            width={design.width}
+            height={design.height}
+            fill="#FFFFFF"
+          />
+        );
+        if (background.image) {
+          bgElements.push(
+            <BackgroundImageLayer
+              key="canvas-bg-image"
+              src={background.image}
+              width={design.width}
+              height={design.height}
+            />
+          );
+        }
+        break;
       default:
         bgElements.push(
           <Rect
@@ -571,7 +654,8 @@ export function DesignCanvas() {
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
-        draggable={isSpacePressed}
+        onDragMove={handleDragMove}
+        onDragEnd={handleDragEnd}
       >
         <Layer>
           {/* 背景 */}
