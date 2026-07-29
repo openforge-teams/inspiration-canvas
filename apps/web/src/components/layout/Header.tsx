@@ -15,7 +15,7 @@ import { useDesignStore } from '@/store/useDesignStore';
 
 export function Header() {
   const { setShowExportModal } = useUIStore();
-  const { design, updateTitle, setZoom, undo, redo, historyIndex, history } = useDesignStore();
+  const { design, updateTitle, setZoom, setScroll, undo, redo, historyIndex, history } = useDesignStore();
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [titleInput, setTitleInput] = useState(design.title);
 
@@ -51,6 +51,7 @@ export function Header() {
 
   const handleZoomReset = () => {
     setZoom(1);
+    setScroll(0, 0);
   };
 
   return (

@@ -63,18 +63,23 @@ const TEXT_PRESETS: TextPreset[] = [
 ];
 
 function TextPanel() {
-  const { addElement } = useDesignStore();
+  const { addElement, design } = useDesignStore();
   const { setActiveTool, setActivePanel } = useUIStore();
 
   const handleAddText = (preset: TextPreset) => {
-    const element = createDefaultElement('text', 100, 100);
+    const elWidth = preset.fontSize * preset.text.length * 0.6;
+    const elHeight = preset.fontSize * 1.4;
+    const offset = design.elements.length * 25;
+    const x = design.width / 2 - elWidth / 2 + offset;
+    const y = design.height / 2 - elHeight / 2 + offset;
+    const element = createDefaultElement('text', x, y);
     element.props = {
       ...element.props,
       text: preset.text,
       fontSize: preset.fontSize,
       fontWeight: preset.fontWeight,
-      width: preset.fontSize * preset.text.length * 0.6,
-      height: preset.fontSize * 1.4,
+      width: elWidth,
+      height: elHeight,
     } as any;
     element.name = preset.name;
     addElement(element);
@@ -129,11 +134,14 @@ const SHAPE_PRESETS: ShapePreset[] = [
 ];
 
 function ShapePanel() {
-  const { addElement } = useDesignStore();
+  const { addElement, design } = useDesignStore();
   const { setActiveTool, setActivePanel } = useUIStore();
 
   const handleAddShape = (preset: ShapePreset) => {
-    const element = createDefaultElement('shape', 100, 100);
+    const offset = design.elements.length * 25;
+    const x = design.width / 2 - 75 + offset;
+    const y = design.height / 2 - 75 + offset;
+    const element = createDefaultElement('shape', x, y);
     element.props = {
       ...element.props,
       shapeType: preset.shapeType,
@@ -172,7 +180,7 @@ function ShapePanel() {
 
 // ─── 素材库面板（图片） ───
 function AssetPanel() {
-  const { addElement } = useDesignStore();
+  const { addElement, design } = useDesignStore();
   const { setActiveTool, setActivePanel } = useUIStore();
   const assets = [
     { id: 'asset-001', name: '山脉风景', type: 'image', url: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=200' },
@@ -182,7 +190,10 @@ function AssetPanel() {
   ];
 
   const handleAddImage = (asset: typeof assets[0]) => {
-    const element = createDefaultElement('image', 100, 100);
+    const offset = design.elements.length * 25;
+    const x = design.width / 2 - 150 + offset;
+    const y = design.height / 2 - 100 + offset;
+    const element = createDefaultElement('image', x, y);
     element.props = {
       ...element.props,
       src: asset.url.replace('w=200', 'w=800'),
@@ -232,7 +243,10 @@ function AssetPanel() {
                 const reader = new FileReader();
                 reader.onload = () => {
                   const imgSrc = reader.result as string;
-                  const element = createDefaultElement('image', 100, 100);
+                  const offset = design.elements.length * 25;
+                  const x = design.width / 2 - 150 + offset;
+                  const y = design.height / 2 - 100 + offset;
+                  const element = createDefaultElement('image', x, y);
                   element.props = { ...element.props, src: imgSrc } as any;
                   element.name = file.name;
                   addElement(element);
