@@ -223,10 +223,14 @@ export function DesignCanvas() {
   );
 
   // 点击画布：空白处取消选中 / 使用工具时创建元素
+  const isCanvasSurface = useCallback((target: Konva.Node) => {
+    const name = target.name();
+    return target === target.getStage() || name === 'canvas-bg';
+  }, []);
+
   const handleStageClick = useCallback(
     (e: Konva.KonvaEventObject<MouseEvent>) => {
-      const clickedOnEmpty = e.target === e.target.getStage();
-      if (!clickedOnEmpty) return;
+      if (!isCanvasSurface(e.target)) return;
 
       // 如果当前有激活的工具（非选择），在点击位置创建对应元素
       if (activeTool !== 'select') {
@@ -268,6 +272,9 @@ export function DesignCanvas() {
           return;
         }
 
+        // 线条工具通过左侧面板添加，画布点击不直接创建
+        if (elementType === 'line') return;
+
         addElement(newElement);
         setActiveTool('select');
         return;
@@ -276,7 +283,7 @@ export function DesignCanvas() {
       clearSelection();
       setSelectedElementId(null);
     },
-    [activeTool, addElement, clearSelection, setActiveTool, setSelectedElementId]
+    [activeTool, addElement, clearSelection, setActiveTool, setSelectedElementId, isCanvasSurface]
   );
 
   // 鼠标按下 - 开始平移
@@ -509,6 +516,7 @@ export function DesignCanvas() {
         bgElements.push(
           <Rect
             key="canvas-bg"
+            name="canvas-bg"
             x={0}
             y={0}
             width={design.width}
@@ -521,6 +529,7 @@ export function DesignCanvas() {
         bgElements.push(
           <Rect
             key="canvas-bg"
+            name="canvas-bg"
             x={0}
             y={0}
             width={design.width}
@@ -552,6 +561,7 @@ export function DesignCanvas() {
         bgElements.push(
           <Rect
             key="canvas-bg"
+            name="canvas-bg"
             x={0}
             y={0}
             width={design.width}
@@ -574,6 +584,7 @@ export function DesignCanvas() {
         bgElements.push(
           <Rect
             key="canvas-bg"
+            name="canvas-bg"
             x={0}
             y={0}
             width={design.width}

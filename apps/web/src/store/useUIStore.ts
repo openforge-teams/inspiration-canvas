@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 
 export type ActiveTool = 'select' | 'text' | 'image' | 'shape' | 'line';
-export type ActivePanel = 'templates' | 'assets' | 'pages' | 'text' | 'shapes' | null;
+export type ActivePanel = 'templates' | 'assets' | 'pages' | 'text' | 'shapes' | 'lines' | null;
 export type RightTabType = 'design' | 'layers';
 
 // 类型别名兼容

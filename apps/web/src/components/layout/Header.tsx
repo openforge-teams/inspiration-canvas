@@ -7,7 +7,6 @@ import IconButton from '@mui/material/IconButton';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import Tooltip from '@mui/material/Tooltip';
-import Divider from '@mui/material/Divider';
 import UndoIcon from '@mui/icons-material/Undo';
 import RedoIcon from '@mui/icons-material/Redo';
 import ZoomInIcon from '@mui/icons-material/ZoomIn';
@@ -79,8 +78,6 @@ export function Header() {
             灵感画布
           </Typography>
         </Box>
-
-        <Divider orientation="vertical" flexItem sx={{ mx: 1, borderColor: m3.outlineVariant }} />
 
         {/* Editable title */}
         <Box sx={{ display: 'flex', alignItems: 'center', minWidth: 160 }}>
@@ -182,8 +179,6 @@ export function Header() {
             </IconButton>
           </Tooltip>
         </Box>
-
-        <Divider orientation="vertical" flexItem sx={{ mx: 1.5, borderColor: m3.outlineVariant }} />
 
         {/* Actions */}
         <Button

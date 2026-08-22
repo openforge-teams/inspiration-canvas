@@ -40,7 +40,7 @@ const TOOLS: ToolItem[] = [
   { id: 'text', icon: TextIcon, label: '文本', panel: 'text' },
   { id: 'image', icon: ImageIcon, label: '图片', panel: 'assets' },
   { id: 'shape', icon: ShapeIcon, label: '形状', panel: 'shapes' },
-  { id: 'line', icon: LineIcon, label: '线条', panel: null },
+  { id: 'line', icon: LineIcon, label: '线条', panel: 'lines' },
 ];
 
 const PANELS: { id: PanelType; icon: typeof TemplateIcon; label: string }[] = [
@@ -253,6 +253,79 @@ function AssetPanel() {
   );
 }
 
+function LinePanel() {
+  const { addElement } = useDesignStore();
+  const { setActiveTool, setActivePanel } = useUIStore();
+
+  const LINE_PRESETS = [
+    { name: '水平线', points: [0, 0, 200, 0] as number[], width: 200, height: 4 },
+    { name: '垂直线', points: [0, 0, 0, 200] as number[], width: 4, height: 200 },
+    { name: '对角线', points: [0, 0, 200, 200] as number[], width: 200, height: 200 },
+    { name: '短横线', points: [0, 0, 120, 0] as number[], width: 120, height: 4 },
+  ];
+
+  const handleAddLine = (preset: (typeof LINE_PRESETS)[0]) => {
+    const element = createDefaultElement('line', 100, 100);
+    element.props = {
+      ...element.props,
+      points: preset.points,
+      width: preset.width,
+      height: preset.height,
+    } as any;
+    element.name = preset.name;
+    addElement(element);
+    setActiveTool('select');
+    setActivePanel(null);
+  };
+
+  return (
+    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', bgcolor: m3.surfaceContainerLowest }}>
+      <PanelHeader title="线条库" />
+      <Box sx={{ flex: 1, overflowY: 'auto', p: 1.5 }}>
+        <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1 }}>
+          {LINE_PRESETS.map((preset) => (
+            <Card key={preset.name} variant="outlined">
+              <CardActionArea
+                onClick={() => handleAddLine(preset)}
+                sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', py: 2, gap: 1 }}
+              >
+                <Box
+                  sx={{
+                    width: 48,
+                    height: 48,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <Box
+                    component="svg"
+                    viewBox="0 0 48 48"
+                    sx={{ width: 40, height: 40 }}
+                  >
+                    <line
+                      x1={preset.points[0] * 0.2 + 4}
+                      y1={preset.points[1] * 0.2 + 24}
+                      x2={preset.points[2] * 0.2 + 4}
+                      y2={preset.points[3] * 0.2 + 24}
+                      stroke={m3.onSurfaceVariant}
+                      strokeWidth={2}
+                      strokeLinecap="round"
+                    />
+                  </Box>
+                </Box>
+                <Typography variant="caption" sx={{ fontWeight: 500 }}>
+                  {preset.name}
+                </Typography>
+              </CardActionArea>
+            </Card>
+          ))}
+        </Box>
+      </Box>
+    </Box>
+  );
+}
+
 function PagePanel() {
   return (
     <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', bgcolor: m3.surfaceContainerLowest }}>
@@ -348,6 +421,8 @@ export function LeftSidebar() {
         return <TextPanel />;
       case 'shapes':
         return <ShapePanel />;
+      case 'lines':
+        return <LinePanel />;
       default:
         return null;
     }
