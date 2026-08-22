@@ -108,7 +108,7 @@ export function DesignCanvas() {
       window.removeEventListener('resize', updateSize);
       observer.disconnect();
     };
-  }, [design.width, design.height, design.zoom, setZoom]);
+  }, [design.width, design.height, setZoom]);
 
   // 注册 stage 引用供其他组件（如 ExportModal）使用
   useEffect(() => {
@@ -185,37 +185,42 @@ export function DesignCanvas() {
     };
   }, [undo, redo, deleteElement, selectedIds, deselectAll, design.elements]);
 
-  // 滚轮缩放
-  const handleWheel = useCallback((e: Konva.KonvaEventObject<WheelEvent>) => {
-    e.evt.preventDefault();
+  // 滚轮缩放（scroll 存储相对居中位置的偏移量，而非 Stage 绝对坐标）
+  const handleWheel = useCallback(
+    (e: Konva.KonvaEventObject<WheelEvent>) => {
+      e.evt.preventDefault();
 
-    const stage = stageRef.current;
-    if (!stage) return;
+      const stage = stageRef.current;
+      if (!stage) return;
 
-    const oldScale = stage.scaleX();
-    const pointer = stage.getPointerPosition();
-    if (!pointer) return;
+      const oldScale = design.zoom;
+      const pointer = stage.getPointerPosition();
+      if (!pointer) return;
 
-    const mousePointTo = {
-      x: (pointer.x - stage.x()) / oldScale,
-      y: (pointer.y - stage.y()) / oldScale,
-    };
+      const currentOffsetX = (stageSize.width - design.width * oldScale) / 2;
+      const currentOffsetY = (stageSize.height - design.height * oldScale) / 2;
+      const currentX = currentOffsetX + design.scrollX;
+      const currentY = currentOffsetY + design.scrollY;
 
-    const delta = e.evt.deltaY > 0 ? 0.9 : 1.1;
-    const newScale = Math.max(0.1, Math.min(5, oldScale * delta));
+      const mousePointTo = {
+        x: (pointer.x - currentX) / oldScale,
+        y: (pointer.y - currentY) / oldScale,
+      };
 
-    const newPos = {
-      x: pointer.x - mousePointTo.x * newScale,
-      y: pointer.y - mousePointTo.y * newScale,
-    };
+      const delta = e.evt.deltaY > 0 ? 0.9 : 1.1;
+      const newScale = Math.max(0.1, Math.min(5, oldScale * delta));
 
-    stage.scale({ x: newScale, y: newScale });
-    stage.position(newPos);
-    stage.batchDraw();
+      const newOffsetX = (stageSize.width - design.width * newScale) / 2;
+      const newOffsetY = (stageSize.height - design.height * newScale) / 2;
 
-    setZoom(newScale);
-    setScroll(newPos.x, newPos.y);
-  }, [setZoom, setScroll]);
+      const newX = pointer.x - mousePointTo.x * newScale;
+      const newY = pointer.y - mousePointTo.y * newScale;
+
+      setZoom(newScale);
+      setScroll(newX - newOffsetX, newY - newOffsetY);
+    },
+    [design.zoom, design.scrollX, design.scrollY, design.width, design.height, stageSize, setZoom, setScroll],
+  );
 
   // 点击画布：空白处取消选中 / 使用工具时创建元素
   const handleStageClick = useCallback(
@@ -285,25 +290,14 @@ export function DesignCanvas() {
   }, [isSpacePressed]);
 
   // 鼠标移动 - 平移画布
-  const handleMouseMove = useCallback((e: Konva.KonvaEventObject<MouseEvent>) => {
-    if (!isPanning) return;
+  const handleMouseMove = useCallback(
+    (e: Konva.KonvaEventObject<MouseEvent>) => {
+      if (!isPanning) return;
 
-    const stage = stageRef.current;
-    if (!stage) return;
-
-    const dx = e.evt.movementX;
-    const dy = e.evt.movementY;
-
-    const newPos = {
-      x: stage.x() + dx,
-      y: stage.y() + dy,
-    };
-
-    stage.position(newPos);
-    stage.batchDraw();
-
-    setScroll(newPos.x, newPos.y);
-  }, [isPanning, setScroll]);
+      setScroll(design.scrollX + e.evt.movementX, design.scrollY + e.evt.movementY);
+    },
+    [isPanning, design.scrollX, design.scrollY, setScroll],
+  );
 
   // 鼠标抬起 - 结束平移
   const handleMouseUp = useCallback(() => {
