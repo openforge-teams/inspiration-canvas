@@ -1,39 +1,45 @@
 import { useState, useEffect } from 'react';
-import {
-  Palette,
-  Image,
-  Layers,
-  BookOpen,
-  Music,
-  MessageCircle,
-  Frame,
-  BarChart3,
-  LineChart,
-  Newspaper,
-  MonitorPlay,
-  Globe,
-  Camera,
-  Users,
-  Twitter,
-} from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+import Button from '@mui/material/Button';
+import TextField from '@mui/material/TextField';
+import ToggleButton from '@mui/material/ToggleButton';
+import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
+import Divider from '@mui/material/Divider';
+import Card from '@mui/material/Card';
+import CardActionArea from '@mui/material/CardActionArea';
+import LayersIcon from '@mui/icons-material/Layers';
+import PaletteIcon from '@mui/icons-material/Palette';
+import ImageIcon from '@mui/icons-material/Image';
+import MenuBookIcon from '@mui/icons-material/MenuBook';
+import MusicNoteIcon from '@mui/icons-material/MusicNote';
+import ChatBubbleOutlineOutlinedIcon from '@mui/icons-material/ChatBubbleOutlineOutlined';
+import CropFreeIcon from '@mui/icons-material/CropFree';
+import BarChartIcon from '@mui/icons-material/BarChart';
+import ShowChartIcon from '@mui/icons-material/ShowChart';
+import ArticleIcon from '@mui/icons-material/Article';
+import OndemandVideoIcon from '@mui/icons-material/OndemandVideo';
+import LanguageIcon from '@mui/icons-material/Language';
+import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
+import GroupsIcon from '@mui/icons-material/Groups';
+import type { SvgIconComponent } from '@mui/icons-material';
 import { NumberInput } from '../common/NumberInput';
 import { ColorPicker } from '../common/ColorPicker';
 import { useDesignStore } from '@/store/useDesignStore';
+import { m3 } from '@/theme/m3Theme';
 
-const SIZE_PRESETS: Array<{ name: string; width: number; height: number; icon: LucideIcon }> = [
-  { name: '小红书', width: 1080, height: 1440, icon: BookOpen },
-  { name: '抖音', width: 1080, height: 1920, icon: Music },
-  { name: '微信朋友圈', width: 1080, height: 1080, icon: MessageCircle },
-  { name: '海报', width: 750, height: 1334, icon: Frame },
-  { name: 'PPT 16:9', width: 1920, height: 1080, icon: BarChart3 },
-  { name: 'PPT 4:3', width: 1440, height: 1080, icon: LineChart },
-  { name: '公众号封面', width: 900, height: 383, icon: Newspaper },
-  { name: 'B 站封面', width: 1146, height: 717, icon: MonitorPlay },
-  { name: '微博', width: 1080, height: 1080, icon: Globe },
-  { name: 'Instagram', width: 1080, height: 1080, icon: Camera },
-  { name: 'Facebook', width: 1200, height: 630, icon: Users },
-  { name: 'Twitter/X', width: 1200, height: 675, icon: Twitter },
+const SIZE_PRESETS: Array<{ name: string; width: number; height: number; icon: SvgIconComponent }> = [
+  { name: '小红书', width: 1080, height: 1440, icon: MenuBookIcon },
+  { name: '抖音', width: 1080, height: 1920, icon: MusicNoteIcon },
+  { name: '微信朋友圈', width: 1080, height: 1080, icon: ChatBubbleOutlineOutlinedIcon },
+  { name: '海报', width: 750, height: 1334, icon: CropFreeIcon },
+  { name: 'PPT 16:9', width: 1920, height: 1080, icon: BarChartIcon },
+  { name: 'PPT 4:3', width: 1440, height: 1080, icon: ShowChartIcon },
+  { name: '公众号封面', width: 900, height: 383, icon: ArticleIcon },
+  { name: 'B 站封面', width: 1146, height: 717, icon: OndemandVideoIcon },
+  { name: '微博', width: 1080, height: 1080, icon: LanguageIcon },
+  { name: 'Instagram', width: 1080, height: 1080, icon: PhotoCameraIcon },
+  { name: 'Facebook', width: 1200, height: 630, icon: GroupsIcon },
 ];
 
 const GRADIENT_PRESETS = [
@@ -51,25 +57,20 @@ type BgType = 'solid' | 'gradient' | 'image';
 
 export function DesignProperties() {
   const { design, updateDesignSize, setBackground } = useDesignStore();
-  const [bgType, setBgType] = useState<BgType>(
-    (design.background.type as BgType) || 'solid'
-  );
+  const [bgType, setBgType] = useState<BgType>((design.background.type as BgType) || 'solid');
   const [customWidth, setCustomWidth] = useState(design.width);
   const [customHeight, setCustomHeight] = useState(design.height);
   const [imageUrl, setImageUrl] = useState(design.background.image || '');
 
-  // 当设计尺寸变化时（如应用模板、点击预设尺寸），同步自定义尺寸输入框
   useEffect(() => {
     setCustomWidth(design.width);
     setCustomHeight(design.height);
   }, [design.width, design.height]);
 
-  // 当背景类型变化时，同步本地状态
   useEffect(() => {
     setBgType((design.background.type as BgType) || 'solid');
   }, [design.background.type]);
 
-  // 当背景图片变化时（如应用模板、撤销重做），同步本地输入框
   useEffect(() => {
     setImageUrl(design.background.image || '');
   }, [design.background.image]);
@@ -78,10 +79,6 @@ export function DesignProperties() {
     setCustomWidth(width);
     setCustomHeight(height);
     updateDesignSize(width, height);
-  };
-
-  const handleCustomSize = () => {
-    updateDesignSize(customWidth, customHeight);
   };
 
   const handleBgColorChange = (color: string) => {
@@ -93,58 +90,23 @@ export function DesignProperties() {
       type: 'gradient',
       gradient: {
         type: 'linear',
-        colors: colors.map((color, i) => ({
-          color,
-          offset: i / (colors.length - 1),
-        })),
+        colors: colors.map((color, i) => ({ color, offset: i / (colors.length - 1) })),
         angle: 135,
       },
     });
   };
 
-  const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      const src = reader.result as string;
-      setImageUrl(src);
-      setBackground({ type: 'image', image: src });
-    };
-    reader.readAsDataURL(file);
-    e.target.value = '';
-  };
-
-  const handleImageUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setImageUrl(e.target.value);
-  };
-
   const applyImageUrl = () => {
     const trimmed = imageUrl.trim();
-    if (trimmed) {
-      setBackground({ type: 'image', image: trimmed });
-    }
-  };
-
-  const handleImageUrlKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      applyImageUrl();
-    }
+    if (trimmed) setBackground({ type: 'image', image: trimmed });
   };
 
   const getBgPreviewStyle = () => {
     const bg = design.background;
-    if (bg.type === 'solid') {
-      return { backgroundColor: bg.color || '#FFFFFF' };
-    }
+    if (bg.type === 'solid') return { backgroundColor: bg.color || '#FFFFFF' };
     if (bg.type === 'gradient' && bg.gradient) {
-      const stops = bg.gradient.colors
-        .map((c) => `${c.color} ${c.offset * 100}%`)
-        .join(', ');
-      return {
-        background: `linear-gradient(${bg.gradient.angle}deg, ${stops})`,
-      };
+      const stops = bg.gradient.colors.map((c) => `${c.color} ${c.offset * 100}%`).join(', ');
+      return { background: `linear-gradient(${bg.gradient.angle}deg, ${stops})` };
     }
     if (bg.type === 'image' && bg.image) {
       return { backgroundImage: `url(${bg.image})`, backgroundSize: 'cover' };
@@ -153,182 +115,192 @@ export function DesignProperties() {
   };
 
   return (
-    <div className="p-4 space-y-5 overflow-y-auto">
-      {/* 尺寸预设 */}
-      <div className="space-y-3">
-        <h3 className="text-sm font-semibold text-gray-800 flex items-center gap-2">
-          <Layers className="w-4 h-4" />
+    <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+      <Box>
+        <Typography variant="subtitle2" sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
+          <LayersIcon sx={{ fontSize: 18 }} />
           画布尺寸
-        </h3>
+        </Typography>
 
-        {/* 当前尺寸预览 */}
-        <div
-          className="w-full h-24 rounded-lg border border-gray-200 shadow-sm flex items-center justify-center relative overflow-hidden"
-          style={getBgPreviewStyle()}
+        <Box
+          sx={{
+            width: '100%',
+            height: 96,
+            borderRadius: 2,
+            border: `1px solid ${m3.outlineVariant}`,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            overflow: 'hidden',
+            ...getBgPreviewStyle(),
+          }}
         >
-          <span className="bg-black/50 text-white text-xs px-2 py-1 rounded">
+          <Typography
+            variant="caption"
+            sx={{ bgcolor: 'rgba(0,0,0,0.5)', color: '#fff', px: 1, py: 0.5, borderRadius: 1 }}
+          >
             {design.width} × {design.height}
-          </span>
-        </div>
+          </Typography>
+        </Box>
 
-        {/* 预设尺寸网格 */}
-        <div className="grid grid-cols-3 gap-2">
+        <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 1, mt: 1.5 }}>
           {SIZE_PRESETS.map((preset) => {
             const Icon = preset.icon;
             return (
-            <button
-              key={preset.name}
-              onClick={() => handlePresetSize(preset.width, preset.height)}
-              className="flex flex-col items-center p-2 rounded-lg border border-gray-200 hover:border-primary-400 hover:bg-primary-50 transition-colors text-left"
-            >
-              <Icon className="w-5 h-5 mb-1" />
-              <span className="text-xs font-medium text-gray-700">{preset.name}</span>
-              <span className="text-[10px] text-gray-400">
-                {preset.width}×{preset.height}
-              </span>
-            </button>
+              <Card key={preset.name} variant="outlined">
+                <CardActionArea
+                  onClick={() => handlePresetSize(preset.width, preset.height)}
+                  sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', py: 1.5, gap: 0.5 }}
+                >
+                  <Icon sx={{ fontSize: 20, color: m3.onSurfaceVariant }} />
+                  <Typography variant="caption" sx={{ fontWeight: 500 }} align="center">
+                    {preset.name}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary" sx={{ fontSize: 10 }}>
+                    {preset.width}×{preset.height}
+                  </Typography>
+                </CardActionArea>
+              </Card>
             );
           })}
-        </div>
+        </Box>
 
-        {/* 自定义尺寸 */}
-        <div className="space-y-2 pt-2 border-t border-gray-100">
-          <span className="text-xs text-gray-500 font-medium">自定义尺寸</span>
-          <div className="grid grid-cols-2 gap-2">
-            <NumberInput
-              label="宽度"
-              value={customWidth}
-              onChange={setCustomWidth}
-              unit="px"
-              min={1}
-              max={10000}
-            />
-            <NumberInput
-              label="高度"
-              value={customHeight}
-              onChange={setCustomHeight}
-              unit="px"
-              min={1}
-              max={10000}
-            />
-          </div>
-          <button
-            onClick={handleCustomSize}
-            className="w-full h-8 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md transition-colors"
-          >
-            应用尺寸
-          </button>
-        </div>
-      </div>
+        <Divider sx={{ my: 2 }} />
+        <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 500 }}>
+          自定义尺寸
+        </Typography>
+        <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1.5, mt: 1 }}>
+          <NumberInput label="宽度" value={customWidth} onChange={setCustomWidth} unit="px" min={1} max={10000} />
+          <NumberInput label="高度" value={customHeight} onChange={setCustomHeight} unit="px" min={1} max={10000} />
+        </Box>
+        <Button
+          fullWidth
+          variant="outlined"
+          onClick={() => updateDesignSize(customWidth, customHeight)}
+          sx={{ mt: 1.5, borderRadius: 5 }}
+        >
+          应用尺寸
+        </Button>
+      </Box>
 
-      {/* 背景设置 */}
-      <div className="space-y-3 border-t pt-4">
-        <h3 className="text-sm font-semibold text-gray-800 flex items-center gap-2">
-          <Palette className="w-4 h-4" />
+      <Divider />
+
+      <Box>
+        <Typography variant="subtitle2" sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
+          <PaletteIcon sx={{ fontSize: 18 }} />
           背景设置
-        </h3>
+        </Typography>
 
-        {/* 背景类型切换 */}
-        <div className="flex gap-1 p-1 bg-gray-100 rounded-lg">
-          <button
-            onClick={() => setBgType('solid')}
-            className={`flex-1 py-1.5 text-xs font-medium rounded-md transition-colors ${
-              bgType === 'solid'
-                ? 'bg-white text-gray-800 shadow-sm'
-                : 'text-gray-500 hover:text-gray-700'
-            }`}
-          >
-            纯色
-          </button>
-          <button
-            onClick={() => setBgType('gradient')}
-            className={`flex-1 py-1.5 text-xs font-medium rounded-md transition-colors ${
-              bgType === 'gradient'
-                ? 'bg-white text-gray-800 shadow-sm'
-                : 'text-gray-500 hover:text-gray-700'
-            }`}
-          >
-            渐变
-          </button>
-          <button
-            onClick={() => setBgType('image')}
-            className={`flex-1 py-1.5 text-xs font-medium rounded-md transition-colors ${
-              bgType === 'image'
-                ? 'bg-white text-gray-800 shadow-sm'
-                : 'text-gray-500 hover:text-gray-700'
-            }`}
-          >
-            图片
-          </button>
-        </div>
+        <ToggleButtonGroup
+          value={bgType}
+          exclusive
+          onChange={(_, val) => val && setBgType(val)}
+          fullWidth
+          size="small"
+          sx={{ mb: 2 }}
+        >
+          <ToggleButton value="solid">纯色</ToggleButton>
+          <ToggleButton value="gradient">渐变</ToggleButton>
+          <ToggleButton value="image">图片</ToggleButton>
+        </ToggleButtonGroup>
 
-        {/* 纯色背景 */}
         {bgType === 'solid' && (
-          <ColorPicker
-            label="背景颜色"
-            value={design.background.color || '#FFFFFF'}
-            onChange={handleBgColorChange}
-          />
+          <ColorPicker label="背景颜色" value={design.background.color || '#FFFFFF'} onChange={handleBgColorChange} />
         )}
 
-        {/* 渐变背景 */}
         {bgType === 'gradient' && (
-          <div className="space-y-2">
-            <span className="text-xs text-gray-500 font-medium">渐变预设</span>
-            <div className="grid grid-cols-4 gap-2">
+          <Box>
+            <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 500 }}>
+              渐变预设
+            </Typography>
+            <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 1, mt: 1 }}>
               {GRADIENT_PRESETS.map((preset) => (
-                <button
+                <Box
                   key={preset.name}
                   onClick={() => handleGradientChange(preset.colors)}
-                  className="w-full h-10 rounded-md border border-gray-200 hover:border-primary-400 transition-colors"
-                  style={{
-                    background: `linear-gradient(135deg, ${preset.colors.join(', ')})`,
-                  }}
                   title={preset.name}
+                  sx={{
+                    height: 40,
+                    borderRadius: 2,
+                    border: `1px solid ${m3.outlineVariant}`,
+                    cursor: 'pointer',
+                    background: `linear-gradient(135deg, ${preset.colors.join(', ')})`,
+                    '&:hover': { borderColor: m3.primary },
+                  }}
                 />
               ))}
-            </div>
-          </div>
+            </Box>
+          </Box>
         )}
 
-        {/* 图片背景 */}
         {bgType === 'image' && (
-          <div className="space-y-2">
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
             {design.background.image && (
-              <div
-                className="w-full h-24 rounded-md border border-gray-200 bg-cover bg-center"
-                style={{ backgroundImage: `url(${design.background.image})` }}
+              <Box
+                sx={{
+                  width: '100%',
+                  height: 96,
+                  borderRadius: 2,
+                  border: `1px solid ${m3.outlineVariant}`,
+                  backgroundImage: `url(${design.background.image})`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                }}
               />
             )}
-            <div className="flex items-center justify-center w-full h-20 bg-gray-50 border border-dashed border-gray-200 rounded-md">
-              <label className="cursor-pointer text-sm text-primary-600 hover:text-primary-700 flex items-center gap-1">
-                <Image className="w-4 h-4" />
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                height: 80,
+                border: `1px dashed ${m3.outline}`,
+                borderRadius: 2,
+                bgcolor: m3.surfaceContainerLow,
+              }}
+            >
+              <Typography component="label" variant="body2" color="primary" sx={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                <ImageIcon fontSize="small" />
                 上传背景图片
                 <input
                   type="file"
                   accept="image/*"
-                  className="hidden"
-                  onChange={handleImageFileChange}
+                  hidden
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    const reader = new FileReader();
+                    reader.onload = () => {
+                      const src = reader.result as string;
+                      setImageUrl(src);
+                      setBackground({ type: 'image', image: src });
+                    };
+                    reader.readAsDataURL(file);
+                    e.target.value = '';
+                  }}
                 />
-              </label>
-            </div>
-            <input
-              type="text"
+              </Typography>
+            </Box>
+            <TextField
+              fullWidth
+              size="small"
               value={imageUrl}
-              onChange={handleImageUrlChange}
-              onKeyDown={handleImageUrlKeyDown}
+              onChange={(e) => setImageUrl(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && applyImageUrl()}
               onBlur={applyImageUrl}
               placeholder="或输入图片 URL，按回车应用"
-              className="w-full h-8 px-2 text-sm border border-gray-200 rounded-md focus:outline-none focus:border-primary-500 bg-white"
             />
-          </div>
+          </Box>
         )}
-      </div>
+      </Box>
 
-      {/* 颜色预设 */}
-      <div className="space-y-3 border-t pt-4">
-        <h3 className="text-sm font-semibold text-gray-800">快速配色</h3>
-        <div className="grid grid-cols-6 gap-1.5">
+      <Divider />
+
+      <Box>
+        <Typography variant="subtitle2" sx={{ mb: 1.5 }}>
+          快速配色
+        </Typography>
+        <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 0.75 }}>
           {[
             '#FFFFFF', '#F8FAFC', '#F1F5F9', '#E2E8F0', '#CBD5E1', '#94A3B8',
             '#64748B', '#475569', '#334155', '#1E293B', '#0F172A', '#020617',
@@ -343,16 +315,23 @@ export function DesignProperties() {
             '#EFF6FF', '#DBEAFE', '#BFDBFE', '#93C5FD', '#60A5FA', '#3B82F6',
             '#EEF2FF', '#E0E7FF', '#C7D2FE', '#A5B4FC', '#818CF8', '#6366F1',
           ].map((color) => (
-            <button
+            <Box
               key={color}
               onClick={() => handleBgColorChange(color)}
-              className="w-full aspect-square rounded border border-gray-200 hover:scale-110 transition-transform"
-              style={{ backgroundColor: color }}
               title={color}
+              sx={{
+                aspectRatio: '1',
+                borderRadius: 1,
+                border: `1px solid ${m3.outlineVariant}`,
+                bgcolor: color,
+                cursor: 'pointer',
+                transition: 'transform 0.15s',
+                '&:hover': { transform: 'scale(1.15)' },
+              }}
             />
           ))}
-        </div>
-      </div>
-    </div>
+        </Box>
+      </Box>
+    </Box>
   );
 }

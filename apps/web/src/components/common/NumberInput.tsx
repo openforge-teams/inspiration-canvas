@@ -1,5 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
-import { ChevronUp, ChevronDown } from 'lucide-react';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+import TextField from '@mui/material/TextField';
+import InputAdornment from '@mui/material/InputAdornment';
+import IconButton from '@mui/material/IconButton';
+import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 
 interface NumberInputProps {
   value: number;
@@ -27,87 +33,67 @@ export function NumberInput({
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (!isFocused) {
-      setInputValue(String(value));
-    }
+    if (!isFocused) setInputValue(String(value));
   }, [value, isFocused]);
 
   const clamp = (val: number) => Math.min(Math.max(val, min), max);
 
-  const handleIncrement = () => {
-    onChange(clamp(Number(value) + step));
-  };
-
-  const handleDecrement = () => {
-    onChange(clamp(Number(value) - step));
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setInputValue(e.target.value);
-  };
+  const handleIncrement = () => onChange(clamp(Number(value) + step));
+  const handleDecrement = () => onChange(clamp(Number(value) - step));
 
   const handleBlur = () => {
     setIsFocused(false);
     const num = parseFloat(inputValue);
-    if (!isNaN(num)) {
-      onChange(clamp(num));
-    } else {
-      setInputValue(String(value));
-    }
+    if (!isNaN(num)) onChange(clamp(num));
+    else setInputValue(String(value));
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      inputRef.current?.blur();
-    } else if (e.key === 'ArrowUp') {
-      e.preventDefault();
-      handleIncrement();
-    } else if (e.key === 'ArrowDown') {
-      e.preventDefault();
-      handleDecrement();
-    }
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') inputRef.current?.blur();
+    else if (e.key === 'ArrowUp') { e.preventDefault(); handleIncrement(); }
+    else if (e.key === 'ArrowDown') { e.preventDefault(); handleDecrement(); }
   };
 
   return (
-    <div className="flex flex-col gap-1.5">
-      {label && <span className="text-xs text-gray-500 font-medium">{label}</span>}
-      <div className="relative flex items-center">
-        <input
-          ref={inputRef}
-          type="number"
-          value={inputValue}
-          onChange={handleChange}
-          onFocus={() => setIsFocused(true)}
-          onBlur={handleBlur}
-          onKeyDown={handleKeyDown}
-          placeholder={placeholder}
-          min={min}
-          max={max}
-          step={step}
-          className="w-full h-9 pl-2 pr-8 text-sm border border-gray-200 rounded-md focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 bg-white"
-        />
-        {unit && (
-          <span className="absolute right-7 text-xs text-gray-400 pointer-events-none">
-            {unit}
-          </span>
-        )}
-        <div className="absolute right-1 flex flex-col">
-          <button
-            type="button"
-            onClick={handleIncrement}
-            className="w-5 h-4 flex items-center justify-center text-gray-400 hover:text-gray-600 rounded hover:bg-gray-100"
-          >
-            <ChevronUp className="w-3 h-3" />
-          </button>
-          <button
-            type="button"
-            onClick={handleDecrement}
-            className="w-5 h-4 flex items-center justify-center text-gray-400 hover:text-gray-600 rounded hover:bg-gray-100"
-          >
-            <ChevronDown className="w-3 h-3" />
-          </button>
-        </div>
-      </div>
-    </div>
+    <Box>
+      {label && (
+        <Typography variant="caption" color="text.secondary" sx={{ mb: 0.75, display: 'block', fontWeight: 500 }}>
+          {label}
+        </Typography>
+      )}
+      <TextField
+        inputRef={inputRef}
+        type="number"
+        value={inputValue}
+        onChange={(e) => setInputValue(e.target.value)}
+        onFocus={() => setIsFocused(true)}
+        onBlur={handleBlur}
+        onKeyDown={handleKeyDown}
+        placeholder={placeholder}
+        size="small"
+        fullWidth
+        slotProps={{
+          input: {
+            endAdornment: (
+              <InputAdornment position="end">
+                {unit && (
+                  <Typography variant="caption" color="text.disabled" sx={{ mr: 0.5 }}>
+                    {unit}
+                  </Typography>
+                )}
+                <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+                  <IconButton size="small" onClick={handleIncrement} sx={{ p: 0, height: 16 }}>
+                    <KeyboardArrowUpIcon sx={{ fontSize: 14 }} />
+                  </IconButton>
+                  <IconButton size="small" onClick={handleDecrement} sx={{ p: 0, height: 16 }}>
+                    <KeyboardArrowDownIcon sx={{ fontSize: 14 }} />
+                  </IconButton>
+                </Box>
+              </InputAdornment>
+            ),
+          },
+        }}
+      />
+    </Box>
   );
 }

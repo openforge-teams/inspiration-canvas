@@ -1,33 +1,37 @@
-import {
-  Eye,
-  EyeOff,
-  Lock,
-  Unlock,
-  Type,
-  Image,
-  Square,
-  Minus,
-  ChevronUp,
-  ChevronDown,
-  Trash2,
-  Copy,
-} from 'lucide-react';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+import IconButton from '@mui/material/IconButton';
+import ListItemButton from '@mui/material/ListItemButton';
+import Tooltip from '@mui/material/Tooltip';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
+import LockIcon from '@mui/icons-material/Lock';
+import LockOpenIcon from '@mui/icons-material/LockOpen';
+import TextFieldsIcon from '@mui/icons-material/TextFields';
+import ImageIcon from '@mui/icons-material/Image';
+import CropSquareIcon from '@mui/icons-material/CropSquare';
+import HorizontalRuleIcon from '@mui/icons-material/HorizontalRule';
+import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
 import { useDesignStore } from '@/store/useDesignStore';
 import { useUIStore } from '@/store/useUIStore';
 import type { CanvasElement } from '@inspiration/shared';
+import { m3 } from '@/theme/m3Theme';
 
 function getTypeIcon(type: CanvasElement['type']) {
   switch (type) {
     case 'text':
-      return Type;
+      return TextFieldsIcon;
     case 'image':
-      return Image;
+      return ImageIcon;
     case 'shape':
-      return Square;
+      return CropSquareIcon;
     case 'line':
-      return Minus;
+      return HorizontalRuleIcon;
     default:
-      return Square;
+      return CropSquareIcon;
   }
 }
 
@@ -70,140 +74,145 @@ export function LayerPanel() {
 
   if (sortedElements.length === 0) {
     return (
-      <div className="h-full flex items-center justify-center">
-        <div className="text-center text-gray-400">
-          <Square className="w-12 h-12 mx-auto mb-2 opacity-30" />
-          <p className="text-sm">暂无图层</p>
-          <p className="text-xs mt-1">添加元素后将显示在这里</p>
-        </div>
-      </div>
+      <Box sx={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', p: 3 }}>
+        <Box sx={{ textAlign: 'center' }}>
+          <CropSquareIcon sx={{ fontSize: 48, color: m3.outline, opacity: 0.4, mb: 1 }} />
+          <Typography variant="body2" color="text.secondary">
+            暂无图层
+          </Typography>
+          <Typography variant="caption" color="text.disabled" sx={{ mt: 0.5, display: 'block' }}>
+            添加元素后将显示在这里
+          </Typography>
+        </Box>
+      </Box>
     );
   }
 
   return (
-    <div className="h-full flex flex-col bg-white">
-      {/* 头部 */}
-      <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
-        <span className="text-sm font-medium text-gray-800">
-          图层 ({sortedElements.length})
-        </span>
-      </div>
+    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', bgcolor: m3.surfaceContainerLowest }}>
+      <Box sx={{ px: 2, py: 1.5, borderBottom: `1px solid ${m3.outlineVariant}` }}>
+        <Typography variant="subtitle2">图层 ({sortedElements.length})</Typography>
+      </Box>
 
-      {/* 图层列表 */}
-      <div className="flex-1 overflow-y-auto py-1">
+      <Box sx={{ flex: 1, overflowY: 'auto', py: 0.5, px: 1 }}>
         {sortedElements.map((element) => {
           const Icon = getTypeIcon(element.type);
           const isSelected = selectedElementId === element.id;
 
           return (
-            <div
+            <ListItemButton
               key={element.id}
+              selected={isSelected}
               onClick={() => handleSelect(element)}
-              className={`group mx-2 my-0.5 px-2 py-2 rounded-md cursor-pointer flex items-center gap-2 transition-colors ${
-                isSelected
-                  ? 'bg-primary-50 border border-primary-200'
-                  : 'hover:bg-gray-50 border border-transparent'
-              }`}
+              sx={{
+                mb: 0.5,
+                py: 1,
+                px: 1,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1,
+                '&:hover .layer-actions': { opacity: 1 },
+              }}
             >
-              {/* 可见性切换 */}
-              <button
-                onClick={(e) => handleToggleVisibility(e, element)}
-                className="p-0.5 rounded hover:bg-gray-200 text-gray-400 hover:text-gray-600 flex-shrink-0"
-                title={element.props.visible ? '隐藏' : '显示'}
-              >
+              <IconButton size="small" onClick={(e) => handleToggleVisibility(e, element)}>
                 {element.props.visible ? (
-                  <Eye className="w-4 h-4" />
+                  <VisibilityIcon fontSize="small" />
                 ) : (
-                  <EyeOff className="w-4 h-4" />
+                  <VisibilityOffIcon fontSize="small" />
                 )}
-              </button>
+              </IconButton>
 
-              {/* 类型图标 */}
-              <div
-                className={`w-6 h-6 rounded flex items-center justify-center flex-shrink-0 ${
-                  isSelected ? 'bg-primary-100 text-primary-600' : 'bg-gray-100 text-gray-500'
-                }`}
+              <Box
+                sx={{
+                  width: 28,
+                  height: 28,
+                  borderRadius: 2,
+                  bgcolor: isSelected ? m3.primaryContainer : m3.surfaceContainerHigh,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                }}
               >
-                <Icon className="w-3.5 h-3.5" />
-              </div>
+                <Icon sx={{ fontSize: 16, color: isSelected ? m3.onPrimaryContainer : m3.onSurfaceVariant }} />
+              </Box>
 
-              {/* 名称 */}
-              <div className="flex-1 min-w-0">
-                <p
-                  className={`text-sm truncate ${
-                    !element.props.visible ? 'text-gray-300' : 'text-gray-700'
-                  }`}
+              <Box sx={{ flex: 1, minWidth: 0 }}>
+                <Typography
+                  variant="body2"
+                  noWrap
+                  sx={{ color: element.props.visible ? 'text.primary' : 'text.disabled' }}
                 >
                   {element.name}
-                </p>
-                <p className="text-[10px] text-gray-400">{getTypeLabel(element.type)}</p>
-              </div>
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  {getTypeLabel(element.type)}
+                </Typography>
+              </Box>
 
-              {/* 操作按钮 - 默认隐藏，hover 显示 */}
-              <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    moveElementZIndex(element.id, 'up');
-                  }}
-                  className="p-1 rounded hover:bg-gray-200 text-gray-400 hover:text-gray-600"
-                  title="上移一层"
-                >
-                  <ChevronUp className="w-3.5 h-3.5" />
-                </button>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    moveElementZIndex(element.id, 'down');
-                  }}
-                  className="p-1 rounded hover:bg-gray-200 text-gray-400 hover:text-gray-600"
-                  title="下移一层"
-                >
-                  <ChevronDown className="w-3.5 h-3.5" />
-                </button>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    duplicateElement(element.id);
-                  }}
-                  className="p-1 rounded hover:bg-gray-200 text-gray-400 hover:text-gray-600"
-                  title="复制"
-                >
-                  <Copy className="w-3.5 h-3.5" />
-                </button>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    deleteElement(element.id);
-                    if (selectedElementId === element.id) {
-                      setSelectedElementId(null);
-                    }
-                  }}
-                  className="p-1 rounded hover:bg-red-100 text-gray-400 hover:text-red-500"
-                  title="删除"
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                </button>
-              </div>
-
-              {/* 锁定切换 */}
-              <button
-                onClick={(e) => handleToggleLock(e, element)}
-                className={`p-0.5 rounded hover:bg-gray-200 flex-shrink-0 ${
-                  element.props.locked ? 'text-amber-500' : 'text-gray-300 hover:text-gray-500'
-                }`}
-                title={element.props.locked ? '解锁' : '锁定'}
+              <Box
+                className="layer-actions"
+                sx={{ display: 'flex', alignItems: 'center', opacity: 0, transition: 'opacity 0.2s' }}
               >
+                <Tooltip title="上移一层">
+                  <IconButton
+                    size="small"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      moveElementZIndex(element.id, 'up');
+                    }}
+                  >
+                    <KeyboardArrowUpIcon fontSize="small" />
+                  </IconButton>
+                </Tooltip>
+                <Tooltip title="下移一层">
+                  <IconButton
+                    size="small"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      moveElementZIndex(element.id, 'down');
+                    }}
+                  >
+                    <KeyboardArrowDownIcon fontSize="small" />
+                  </IconButton>
+                </Tooltip>
+                <Tooltip title="复制">
+                  <IconButton
+                    size="small"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      duplicateElement(element.id);
+                    }}
+                  >
+                    <ContentCopyIcon fontSize="small" />
+                  </IconButton>
+                </Tooltip>
+                <Tooltip title="删除">
+                  <IconButton
+                    size="small"
+                    color="error"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      deleteElement(element.id);
+                      if (selectedElementId === element.id) setSelectedElementId(null);
+                    }}
+                  >
+                    <DeleteOutlinedIcon fontSize="small" />
+                  </IconButton>
+                </Tooltip>
+              </Box>
+
+              <IconButton size="small" onClick={(e) => handleToggleLock(e, element)}>
                 {element.props.locked ? (
-                  <Lock className="w-3.5 h-3.5" />
+                  <LockIcon fontSize="small" sx={{ color: m3.tertiary }} />
                 ) : (
-                  <Unlock className="w-3.5 h-3.5" />
+                  <LockOpenIcon fontSize="small" sx={{ color: m3.outline }} />
                 )}
-              </button>
-            </div>
+              </IconButton>
+            </ListItemButton>
           );
         })}
-      </div>
-    </div>
+      </Box>
+    </Box>
   );
 }

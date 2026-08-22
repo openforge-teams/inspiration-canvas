@@ -1,51 +1,54 @@
 import {
-  MousePointer2,
-  Type,
-  Image,
-  Shapes,
-  Minus,
-  LayoutTemplate,
-  Folder,
-  Layers,
-  Square,
-  Circle,
-  Triangle,
-  Star,
-  ArrowRight,
-} from 'lucide-react';
+  NearMe as SelectIcon,
+  Title as TextIcon,
+  Image as ImageIcon,
+  Category as ShapeIcon,
+  HorizontalRule as LineIcon,
+  Dashboard as TemplateIcon,
+  PermMedia as AssetIcon,
+  Layers as LayersIcon,
+  CropSquare as SquareIcon,
+  Circle as CircleIcon,
+  ChangeHistory as TriangleIcon,
+  Star as StarIcon,
+  ArrowForward as ArrowIcon,
+} from '@mui/icons-material';
+import Box from '@mui/material/Box';
+import Paper from '@mui/material/Paper';
+import Typography from '@mui/material/Typography';
+import Button from '@mui/material/Button';
+import Card from '@mui/material/Card';
+import CardActionArea from '@mui/material/CardActionArea';
+import CardContent from '@mui/material/CardContent';
+import CardMedia from '@mui/material/CardMedia';
+import Divider from '@mui/material/Divider';
 import { useUIStore, type ToolType, type PanelType } from '@/store/useUIStore';
 import { useDesignStore } from '@/store/useDesignStore';
 import { TemplatePanel } from '../panels/TemplatePanel';
 import { createDefaultElement, type ShapeType } from '@inspiration/shared';
+import { m3 } from '@/theme/m3Theme';
 
 interface ToolItem {
   id: ToolType;
-  icon: typeof MousePointer2;
+  icon: typeof SelectIcon;
   label: string;
   panel: PanelType;
 }
 
 const TOOLS: ToolItem[] = [
-  { id: 'select', icon: MousePointer2, label: '选择', panel: null },
-  { id: 'text', icon: Type, label: '文本', panel: 'text' },
-  { id: 'image', icon: Image, label: '图片', panel: 'assets' },
-  { id: 'shape', icon: Shapes, label: '形状', panel: 'shapes' },
-  { id: 'line', icon: Minus, label: '线条', panel: null },
+  { id: 'select', icon: SelectIcon, label: '选择', panel: null },
+  { id: 'text', icon: TextIcon, label: '文本', panel: 'text' },
+  { id: 'image', icon: ImageIcon, label: '图片', panel: 'assets' },
+  { id: 'shape', icon: ShapeIcon, label: '形状', panel: 'shapes' },
+  { id: 'line', icon: LineIcon, label: '线条', panel: null },
 ];
 
-interface PanelItem {
-  id: PanelType;
-  icon: typeof LayoutTemplate;
-  label: string;
-}
-
-const PANELS: PanelItem[] = [
-  { id: 'templates', icon: LayoutTemplate, label: '模板' },
-  { id: 'assets', icon: Folder, label: '素材' },
-  { id: 'pages', icon: Layers, label: '页面' },
+const PANELS: { id: PanelType; icon: typeof TemplateIcon; label: string }[] = [
+  { id: 'templates', icon: TemplateIcon, label: '模板' },
+  { id: 'assets', icon: AssetIcon, label: '素材' },
+  { id: 'pages', icon: LayersIcon, label: '页面' },
 ];
 
-// ─── 文本预设面板 ───
 interface TextPreset {
   label: string;
   fontSize: number;
@@ -61,6 +64,16 @@ const TEXT_PRESETS: TextPreset[] = [
   { label: '正文', name: '正文', text: '正文内容', fontSize: 18, fontWeight: 400 },
   { label: '小字', name: '小字', text: '小字说明', fontSize: 14, fontWeight: 400 },
 ];
+
+function PanelHeader({ title }: { title: string }) {
+  return (
+    <Box sx={{ px: 2, py: 1.5, borderBottom: `1px solid ${m3.outlineVariant}` }}>
+      <Typography variant="subtitle2" color="text.primary">
+        {title}
+      </Typography>
+    </Box>
+  );
+}
 
 function TextPanel() {
   const { addElement } = useDesignStore();
@@ -83,49 +96,51 @@ function TextPanel() {
   };
 
   return (
-    <div className="h-full flex flex-col bg-white">
-      <div className="px-4 py-3 border-b border-gray-100">
-        <span className="text-sm font-medium text-gray-800">文本预设</span>
-      </div>
-      <div className="flex-1 overflow-y-auto p-3 space-y-2">
+    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', bgcolor: m3.surfaceContainerLowest }}>
+      <PanelHeader title="文本预设" />
+      <Box sx={{ flex: 1, overflowY: 'auto', p: 1.5, display: 'flex', flexDirection: 'column', gap: 1 }}>
         {TEXT_PRESETS.map((preset) => (
-          <button
-            key={preset.label}
-            onClick={() => handleAddText(preset)}
-            className="w-full px-4 py-3 text-left rounded-lg border border-gray-200 hover:border-primary-400 hover:bg-primary-50 transition-all"
-          >
-            <span
-              className="block text-gray-800"
-              style={{
-                fontSize: `${Math.min(preset.fontSize, 24)}px`,
-                fontWeight: preset.fontWeight,
-              }}
-            >
-              {preset.text}
-            </span>
-            <span className="text-xs text-gray-400 mt-1 block">
-              {preset.fontSize}px · {preset.fontWeight === 700 ? '粗体' : preset.fontWeight === 600 ? '半粗' : preset.fontWeight === 500 ? '中等' : '常规'}
-            </span>
-          </button>
+          <Card key={preset.label} variant="outlined">
+            <CardActionArea onClick={() => handleAddText(preset)} sx={{ p: 1.5 }}>
+              <Typography
+                sx={{
+                  fontSize: `${Math.min(preset.fontSize, 24)}px`,
+                  fontWeight: preset.fontWeight,
+                  color: m3.onSurface,
+                }}
+              >
+                {preset.text}
+              </Typography>
+              <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>
+                {preset.fontSize}px ·{' '}
+                {preset.fontWeight === 700
+                  ? '粗体'
+                  : preset.fontWeight === 600
+                    ? '半粗'
+                    : preset.fontWeight === 500
+                      ? '中等'
+                      : '常规'}
+              </Typography>
+            </CardActionArea>
+          </Card>
         ))}
-      </div>
-    </div>
+      </Box>
+    </Box>
   );
 }
 
-// ─── 形状预设面板 ───
 interface ShapePreset {
   shapeType: ShapeType;
   name: string;
-  icon: typeof Square;
+  icon: typeof SquareIcon;
 }
 
 const SHAPE_PRESETS: ShapePreset[] = [
-  { shapeType: 'rect', name: '矩形', icon: Square },
-  { shapeType: 'circle', name: '圆形', icon: Circle },
-  { shapeType: 'triangle', name: '三角形', icon: Triangle },
-  { shapeType: 'star', name: '星形', icon: Star },
-  { shapeType: 'arrow', name: '箭头', icon: ArrowRight },
+  { shapeType: 'rect', name: '矩形', icon: SquareIcon },
+  { shapeType: 'circle', name: '圆形', icon: CircleIcon },
+  { shapeType: 'triangle', name: '三角形', icon: TriangleIcon },
+  { shapeType: 'star', name: '星形', icon: StarIcon },
+  { shapeType: 'arrow', name: '箭头', icon: ArrowIcon },
 ];
 
 function ShapePanel() {
@@ -134,10 +149,7 @@ function ShapePanel() {
 
   const handleAddShape = (preset: ShapePreset) => {
     const element = createDefaultElement('shape', 100, 100);
-    element.props = {
-      ...element.props,
-      shapeType: preset.shapeType,
-    } as any;
+    element.props = { ...element.props, shapeType: preset.shapeType } as any;
     element.name = preset.name;
     addElement(element);
     setActiveTool('select');
@@ -145,48 +157,45 @@ function ShapePanel() {
   };
 
   return (
-    <div className="h-full flex flex-col bg-white">
-      <div className="px-4 py-3 border-b border-gray-100">
-        <span className="text-sm font-medium text-gray-800">形状库</span>
-      </div>
-      <div className="flex-1 overflow-y-auto p-3">
-        <div className="grid grid-cols-2 gap-2">
+    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', bgcolor: m3.surfaceContainerLowest }}>
+      <PanelHeader title="形状库" />
+      <Box sx={{ flex: 1, overflowY: 'auto', p: 1.5 }}>
+        <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1 }}>
           {SHAPE_PRESETS.map((preset) => {
             const Icon = preset.icon;
             return (
-              <button
-                key={preset.shapeType}
-                onClick={() => handleAddShape(preset)}
-                className="flex flex-col items-center justify-center gap-2 py-4 rounded-lg border border-gray-200 hover:border-primary-400 hover:bg-primary-50 transition-all"
-              >
-                <Icon className="w-7 h-7 text-gray-600" />
-                <span className="text-xs font-medium text-gray-600">{preset.name}</span>
-              </button>
+              <Card key={preset.shapeType} variant="outlined">
+                <CardActionArea
+                  onClick={() => handleAddShape(preset)}
+                  sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', py: 2, gap: 1 }}
+                >
+                  <Icon sx={{ fontSize: 32, color: m3.onSurfaceVariant }} />
+                  <Typography variant="caption" sx={{ fontWeight: 500 }}>
+                    {preset.name}
+                  </Typography>
+                </CardActionArea>
+              </Card>
             );
           })}
-        </div>
-      </div>
-    </div>
+        </Box>
+      </Box>
+    </Box>
   );
 }
 
-// ─── 素材库面板（图片） ───
 function AssetPanel() {
   const { addElement } = useDesignStore();
   const { setActiveTool, setActivePanel } = useUIStore();
   const assets = [
-    { id: 'asset-001', name: '山脉风景', type: 'image', url: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=200' },
-    { id: 'asset-002', name: '城市夜景', type: 'image', url: 'https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=200' },
-    { id: 'asset-003', name: '海洋日落', type: 'image', url: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=200' },
-    { id: 'asset-004', name: '森林小径', type: 'image', url: 'https://images.unsplash.com/photo-1448375240586-882707db888b?w=200' },
+    { id: 'asset-001', name: '山脉风景', url: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=200' },
+    { id: 'asset-002', name: '城市夜景', url: 'https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=200' },
+    { id: 'asset-003', name: '海洋日落', url: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=200' },
+    { id: 'asset-004', name: '森林小径', url: 'https://images.unsplash.com/photo-1448375240586-882707db888b?w=200' },
   ];
 
-  const handleAddImage = (asset: typeof assets[0]) => {
+  const handleAddImage = (asset: (typeof assets)[0]) => {
     const element = createDefaultElement('image', 100, 100);
-    element.props = {
-      ...element.props,
-      src: asset.url.replace('w=200', 'w=800'),
-    } as any;
+    element.props = { ...element.props, src: asset.url.replace('w=200', 'w=800') } as any;
     element.name = asset.name;
     addElement(element);
     setActiveTool('select');
@@ -194,34 +203,27 @@ function AssetPanel() {
   };
 
   return (
-    <div className="h-full flex flex-col bg-white">
-      <div className="px-4 py-3 border-b border-gray-100">
-        <span className="text-sm font-medium text-gray-800">素材库</span>
-      </div>
-      <div className="flex-1 overflow-y-auto p-3">
-        <div className="grid grid-cols-2 gap-2">
+    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', bgcolor: m3.surfaceContainerLowest }}>
+      <PanelHeader title="素材库" />
+      <Box sx={{ flex: 1, overflowY: 'auto', p: 1.5 }}>
+        <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1 }}>
           {assets.map((asset) => (
-            <div
-              key={asset.id}
-              onClick={() => handleAddImage(asset)}
-              className="group cursor-pointer rounded-lg border border-gray-200 overflow-hidden hover:border-primary-400 hover:shadow-md transition-all"
-            >
-              <div className="w-full aspect-video bg-gray-100 overflow-hidden">
-                <img
-                  src={asset.url}
-                  alt={asset.name}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                  loading="lazy"
-                />
-              </div>
-              <div className="px-2 py-1.5">
-                <p className="text-xs font-medium text-gray-700 truncate">{asset.name}</p>
-              </div>
-            </div>
+            <Card key={asset.id} variant="outlined">
+              <CardActionArea onClick={() => handleAddImage(asset)}>
+                <CardMedia component="img" height="80" image={asset.url} alt={asset.name} />
+                <CardContent sx={{ py: 1, '&:last-child': { pb: 1 } }}>
+                  <Typography variant="caption" sx={{ fontWeight: 500 }} noWrap>
+                    {asset.name}
+                  </Typography>
+                </CardContent>
+              </CardActionArea>
+            </Card>
           ))}
-        </div>
-        {/* 上传本地图片 */}
-        <button
+        </Box>
+        <Button
+          fullWidth
+          variant="contained"
+          sx={{ mt: 1.5, borderRadius: 5, bgcolor: m3.secondaryContainer, color: m3.onSecondaryContainer, boxShadow: 'none' }}
           onClick={() => {
             const input = document.createElement('input');
             input.type = 'file';
@@ -231,9 +233,8 @@ function AssetPanel() {
               if (file) {
                 const reader = new FileReader();
                 reader.onload = () => {
-                  const imgSrc = reader.result as string;
                   const element = createDefaultElement('image', 100, 100);
-                  element.props = { ...element.props, src: imgSrc } as any;
+                  element.props = { ...element.props, src: reader.result as string } as any;
                   element.name = file.name;
                   addElement(element);
                   setActiveTool('select');
@@ -244,32 +245,74 @@ function AssetPanel() {
             };
             input.click();
           }}
-          className="w-full mt-3 py-2 text-sm font-medium text-primary-600 bg-primary-50 hover:bg-primary-100 rounded-lg transition-colors"
         >
-          + 上传本地图片
-        </button>
-      </div>
-    </div>
+          上传本地图片
+        </Button>
+      </Box>
+    </Box>
   );
 }
 
 function PagePanel() {
   return (
-    <div className="h-full flex flex-col bg-white">
-      <div className="px-4 py-3 border-b border-gray-100">
-        <span className="text-sm font-medium text-gray-800">页面</span>
-      </div>
-      <div className="flex-1 overflow-y-auto p-4">
-        <div className="text-center text-gray-400">
-          <Layers className="w-12 h-12 mx-auto mb-2 opacity-30" />
-          <p className="text-sm">暂无页面</p>
-          <p className="text-xs mt-1">创建新页面以管理多页设计</p>
-        </div>
-        <button className="w-full mt-4 py-2 text-sm font-medium text-primary-600 bg-primary-50 hover:bg-primary-100 rounded-lg transition-colors">
-          + 新建页面
-        </button>
-      </div>
-    </div>
+    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', bgcolor: m3.surfaceContainerLowest }}>
+      <PanelHeader title="页面" />
+      <Box sx={{ flex: 1, overflowY: 'auto', p: 2, textAlign: 'center' }}>
+        <LayersIcon sx={{ fontSize: 48, color: m3.outline, opacity: 0.4, mb: 1 }} />
+        <Typography variant="body2" color="text.secondary">
+          暂无页面
+        </Typography>
+        <Typography variant="caption" color="text.disabled" sx={{ mt: 0.5, display: 'block' }}>
+          创建新页面以管理多页设计
+        </Typography>
+        <Button
+          fullWidth
+          variant="contained"
+          sx={{ mt: 2, borderRadius: 5, bgcolor: m3.secondaryContainer, color: m3.onSecondaryContainer, boxShadow: 'none' }}
+        >
+          新建页面
+        </Button>
+      </Box>
+    </Box>
+  );
+}
+
+function NavRailButton({
+  icon: Icon,
+  label,
+  isActive,
+  onClick,
+}: {
+  icon: typeof SelectIcon;
+  label: string;
+  isActive: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <Box
+      onClick={onClick}
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: 64,
+        py: 1,
+        borderRadius: 4,
+        cursor: 'pointer',
+        bgcolor: isActive ? m3.secondaryContainer : 'transparent',
+        color: isActive ? m3.onSecondaryContainer : m3.onSurfaceVariant,
+        transition: 'all 0.2s',
+        '&:hover': {
+          bgcolor: isActive ? m3.secondaryContainer : m3.surfaceContainerHigh,
+        },
+      }}
+    >
+      <Icon sx={{ fontSize: 24 }} />
+      <Typography variant="caption" sx={{ mt: 0.25, fontWeight: 500, fontSize: '0.6875rem' }}>
+        {label}
+      </Typography>
+    </Box>
   );
 }
 
@@ -278,19 +321,13 @@ export function LeftSidebar() {
 
   const handleToolClick = (tool: ToolType) => {
     if (activeTool === tool) {
-      // 再次点击同一个工具：切回选择，关闭面板
       setActiveTool('select');
       const toolItem = TOOLS.find((t) => t.id === tool);
-      if (toolItem?.panel) {
-        setActivePanel(null);
-      }
+      if (toolItem?.panel) setActivePanel(null);
     } else {
-      // 切换到新工具，并打开对应面板
       setActiveTool(tool);
       const toolItem = TOOLS.find((t) => t.id === tool);
-      if (toolItem?.panel) {
-        setActivePanel(toolItem.panel);
-      }
+      if (toolItem?.panel) setActivePanel(toolItem.panel);
     }
   };
 
@@ -317,64 +354,63 @@ export function LeftSidebar() {
   };
 
   return (
-    <div className="flex flex-shrink-0">
-      <aside className="w-16 bg-white border-r border-gray-200 flex flex-col items-center py-3 gap-1 flex-shrink-0">
-        {/* 工具按钮组 */}
-        <div className="flex flex-col items-center gap-0.5 p-1.5 bg-gray-50 rounded-xl">
-          {TOOLS.map((tool) => {
-            const Icon = tool.icon;
-            const isActive = activeTool === tool.id;
-            return (
-              <button
-                key={tool.id}
-                onClick={() => handleToolClick(tool.id)}
-                className={`group relative w-11 h-11 rounded-lg flex flex-col items-center justify-center gap-0.5 transition-all ${
-                  isActive
-                    ? 'bg-primary-500 text-white shadow-md shadow-primary-200'
-                    : 'text-gray-500 hover:bg-gray-100 hover:text-gray-800'
-                }`}
-                title={tool.label}
-              >
-                <Icon className="w-5 h-5" />
-                <span className="text-[10px] font-medium">{tool.label}</span>
-              </button>
-            );
-          })}
-        </div>
+    <Box sx={{ display: 'flex', flexShrink: 0 }}>
+      {/* M3 Navigation Rail */}
+      <Paper
+        elevation={0}
+        square
+        sx={{
+          width: 80,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          py: 1.5,
+          gap: 0.5,
+          bgcolor: m3.surfaceContainerLowest,
+          borderRight: `1px solid ${m3.outlineVariant}`,
+        }}
+      >
+        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.5 }}>
+          {TOOLS.map((tool) => (
+            <NavRailButton
+              key={tool.id}
+              icon={tool.icon}
+              label={tool.label}
+              isActive={activeTool === tool.id}
+              onClick={() => handleToolClick(tool.id)}
+            />
+          ))}
+        </Box>
 
-        {/* 分隔线 */}
-        <div className="w-8 h-px bg-gray-200 my-2" />
+        <Divider sx={{ width: 48, my: 1, borderColor: m3.outlineVariant }} />
 
-        {/* 底部面板切换 */}
-        <div className="flex-1 flex flex-col items-center justify-end gap-0.5">
-          {PANELS.map((panel) => {
-            const Icon = panel.icon;
-            const isActive = activePanel === panel.id;
-            return (
-              <button
-                key={panel.id}
-                onClick={() => handlePanelClick(panel.id)}
-                className={`group relative w-11 h-11 rounded-lg flex flex-col items-center justify-center gap-0.5 transition-all ${
-                  isActive
-                    ? 'bg-primary-50 text-primary-600 border border-primary-200'
-                    : 'text-gray-500 hover:bg-gray-50 hover:text-gray-800'
-                }`}
-                title={panel.label}
-              >
-                <Icon className="w-5 h-5" />
-                <span className="text-[10px] font-medium">{panel.label}</span>
-              </button>
-            );
-          })}
-        </div>
-      </aside>
+        <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', gap: 0.5 }}>
+          {PANELS.map((panel) => (
+            <NavRailButton
+              key={panel.id}
+              icon={panel.icon}
+              label={panel.label}
+              isActive={activePanel === panel.id}
+              onClick={() => handlePanelClick(panel.id)}
+            />
+          ))}
+        </Box>
+      </Paper>
 
-      {/* 面板内容区 */}
       {activePanel && (
-        <div className="w-64 border-r border-gray-200 flex-shrink-0 overflow-hidden">
+        <Paper
+          elevation={0}
+          square
+          sx={{
+            width: 280,
+            flexShrink: 0,
+            overflow: 'hidden',
+            borderRight: `1px solid ${m3.outlineVariant}`,
+          }}
+        >
           {renderPanel()}
-        </div>
+        </Paper>
       )}
-    </div>
+    </Box>
   );
 }

@@ -1,5 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
-import { ChevronDown } from 'lucide-react';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+import TextField from '@mui/material/TextField';
+import Paper from '@mui/material/Paper';
+import IconButton from '@mui/material/IconButton';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import { m3 } from '@/theme/m3Theme';
 
 interface ColorPickerProps {
   value: string;
@@ -30,65 +36,98 @@ export function ColorPicker({ value, onChange, label, presetColors = DEFAULT_PRE
   }, []);
 
   return (
-    <div className="flex flex-col gap-1.5" ref={containerRef}>
-      {label && <span className="text-xs text-gray-500 font-medium">{label}</span>}
-      <div className="relative">
-        <button
-          type="button"
-          onClick={() => setIsOpen(!isOpen)}
-          className="w-full h-9 px-2 flex items-center gap-2 bg-white border border-gray-200 rounded-md hover:border-gray-300 transition-colors"
-        >
-          <div
-            className="w-5 h-5 rounded border border-gray-200 flex-shrink-0"
-            style={{ backgroundColor: value }}
-          />
-          <span className="text-sm text-gray-700 flex-1 text-left font-mono">{value}</span>
-          <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
-        </button>
+    <Box ref={containerRef}>
+      {label && (
+        <Typography variant="caption" color="text.secondary" sx={{ mb: 0.75, display: 'block', fontWeight: 500 }}>
+          {label}
+        </Typography>
+      )}
+      <Box
+        onClick={() => setIsOpen(!isOpen)}
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 1,
+          px: 1,
+          py: 0.75,
+          border: `1px solid ${m3.outline}`,
+          borderRadius: 1,
+          cursor: 'pointer',
+          bgcolor: m3.surfaceContainerLowest,
+          '&:hover': { borderColor: m3.onSurface },
+        }}
+      >
+        <Box
+          sx={{
+            width: 24,
+            height: 24,
+            borderRadius: 1,
+            border: `1px solid ${m3.outlineVariant}`,
+            bgcolor: value,
+            flexShrink: 0,
+          }}
+        />
+        <Typography variant="body2" sx={{ flex: 1, fontFamily: 'monospace', fontSize: '0.8125rem' }}>
+          {value}
+        </Typography>
+        <KeyboardArrowDownIcon
+          sx={{ fontSize: 18, color: m3.onSurfaceVariant, transform: isOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}
+        />
+      </Box>
 
-        {isOpen && (
-          <div className="absolute z-50 top-full left-0 mt-1 p-3 bg-white border border-gray-200 rounded-lg shadow-lg w-64">
-            <div className="mb-3">
-              <label className="text-xs text-gray-500 block mb-1">自定义颜色</label>
-              <div className="flex gap-2">
-                <input
-                  type="color"
-                  value={value}
-                  onChange={(e) => onChange(e.target.value)}
-                  className="w-9 h-9 rounded border border-gray-200 cursor-pointer p-0"
-                />
-                <input
-                  type="text"
-                  value={value}
-                  onChange={(e) => onChange(e.target.value)}
-                  className="flex-1 h-9 px-2 text-sm border border-gray-200 rounded-md font-mono focus:outline-none focus:border-primary-500"
-                />
-              </div>
-            </div>
-            <div>
-              <label className="text-xs text-gray-500 block mb-1">预设颜色</label>
-              <div className="grid grid-cols-6 gap-1">
-                {presetColors.map((color) => (
-                  <button
-                    key={color}
-                    type="button"
-                    onClick={() => {
-                      onChange(color);
-                      setIsOpen(false);
-                    }}
-                    className={`w-8 h-8 rounded border-2 transition-transform hover:scale-110 ${
-                      value.toLowerCase() === color.toLowerCase()
-                        ? 'border-primary-500'
-                        : 'border-gray-200'
-                    }`}
-                    style={{ backgroundColor: color }}
-                  />
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
+      {isOpen && (
+        <Paper
+          elevation={3}
+          sx={{
+            position: 'absolute',
+            zIndex: 1300,
+            mt: 0.5,
+            p: 2,
+            width: 260,
+            borderRadius: 3,
+          }}
+        >
+          <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: 'block' }}>
+            自定义颜色
+          </Typography>
+          <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
+            <Box
+              component="input"
+              type="color"
+              value={value}
+              onChange={(e) => onChange(e.target.value)}
+              sx={{ width: 40, height: 40, border: `1px solid ${m3.outlineVariant}`, borderRadius: 1, cursor: 'pointer', p: 0 }}
+            />
+            <TextField
+              value={value}
+              onChange={(e) => onChange(e.target.value)}
+              size="small"
+              fullWidth
+              sx={{ '& input': { fontFamily: 'monospace', fontSize: '0.8125rem' } }}
+            />
+          </Box>
+          <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: 'block' }}>
+            预设颜色
+          </Typography>
+          <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 0.75 }}>
+            {presetColors.map((color) => (
+              <IconButton
+                key={color}
+                onClick={() => { onChange(color); setIsOpen(false); }}
+                sx={{
+                  width: 32,
+                  height: 32,
+                  p: 0,
+                  borderRadius: 1,
+                  border: value.toLowerCase() === color.toLowerCase() ? `2px solid ${m3.primary}` : `1px solid ${m3.outlineVariant}`,
+                  bgcolor: color,
+                  '&:hover': { transform: 'scale(1.1)', bgcolor: color },
+                }}
+              />
+            ))}
+          </Box>
+        </Paper>
+      )}
+    </Box>
   );
 }

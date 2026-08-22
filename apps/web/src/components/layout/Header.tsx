@@ -1,17 +1,25 @@
 import { useState } from 'react';
-import {
-  Undo2,
-  Redo2,
-  ZoomIn,
-  ZoomOut,
-  Share2,
-  Download,
-  Sparkles,
-  Edit3,
-  Check,
-} from 'lucide-react';
+import AppBar from '@mui/material/AppBar';
+import Toolbar from '@mui/material/Toolbar';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+import IconButton from '@mui/material/IconButton';
+import Button from '@mui/material/Button';
+import TextField from '@mui/material/TextField';
+import Tooltip from '@mui/material/Tooltip';
+import Divider from '@mui/material/Divider';
+import UndoIcon from '@mui/icons-material/Undo';
+import RedoIcon from '@mui/icons-material/Redo';
+import ZoomInIcon from '@mui/icons-material/ZoomIn';
+import ZoomOutIcon from '@mui/icons-material/ZoomOut';
+import ShareIcon from '@mui/icons-material/Share';
+import FileDownloadIcon from '@mui/icons-material/FileDownload';
+import EditIcon from '@mui/icons-material/Edit';
+import CheckIcon from '@mui/icons-material/Check';
+import PaletteIcon from '@mui/icons-material/Palette';
 import { useUIStore } from '@/store/useUIStore';
 import { useDesignStore } from '@/store/useDesignStore';
+import { m3 } from '@/theme/m3Theme';
 
 export function Header() {
   const { setShowExportModal } = useUIStore();
@@ -41,136 +49,164 @@ export function Header() {
     }
   };
 
-  const handleZoomIn = () => {
-    setZoom(Math.min(zoom + 0.1, 4));
-  };
-
-  const handleZoomOut = () => {
-    setZoom(Math.max(zoom - 0.1, 0.1));
-  };
-
-  const handleZoomReset = () => {
-    setZoom(1);
-  };
-
   return (
-    <header className="h-14 bg-white border-b border-gray-200 flex items-center justify-between px-4 flex-shrink-0">
-      {/* 左侧：Logo + 标题 */}
-      <div className="flex items-center gap-4">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center">
-            <Sparkles className="w-5 h-5 text-white" />
-          </div>
-          <span className="font-semibold text-gray-800 text-lg">灵感画布</span>
-        </div>
+    <AppBar
+      position="static"
+      elevation={0}
+      sx={{
+        bgcolor: m3.surfaceContainerLowest,
+        color: m3.onSurface,
+        borderBottom: `1px solid ${m3.outlineVariant}`,
+      }}
+    >
+      <Toolbar sx={{ minHeight: 64, gap: 1, px: 2 }}>
+        {/* Brand */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mr: 1 }}>
+          <Box
+            sx={{
+              width: 40,
+              height: 40,
+              borderRadius: 3,
+              bgcolor: m3.primaryContainer,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <PaletteIcon sx={{ color: m3.onPrimaryContainer, fontSize: 22 }} />
+          </Box>
+          <Typography variant="h6" sx={{ fontWeight: 500, color: m3.onSurface }}>
+            灵感画布
+          </Typography>
+        </Box>
 
-        <div className="h-6 w-px bg-gray-200" />
+        <Divider orientation="vertical" flexItem sx={{ mx: 1, borderColor: m3.outlineVariant }} />
 
-        {/* 可编辑标题 */}
-        <div className="flex items-center gap-1.5 group">
+        {/* Editable title */}
+        <Box sx={{ display: 'flex', alignItems: 'center', minWidth: 160 }}>
           {isEditingTitle ? (
-            <div className="flex items-center gap-1">
-              <input
-                type="text"
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+              <TextField
                 value={titleInput}
                 onChange={(e) => setTitleInput(e.target.value)}
                 onBlur={handleTitleSubmit}
                 onKeyDown={handleTitleKeyDown}
                 autoFocus
-                className="h-7 px-2 text-sm font-medium text-gray-800 bg-gray-50 border border-primary-300 rounded focus:outline-none focus:ring-2 focus:ring-primary-200 w-48"
+                size="small"
+                sx={{ width: 200 }}
               />
-              <button
-                onClick={handleTitleSubmit}
-                className="p-1 rounded hover:bg-gray-100 text-primary-600"
-              >
-                <Check className="w-4 h-4" />
-              </button>
-            </div>
+              <IconButton size="small" onClick={handleTitleSubmit} color="primary">
+                <CheckIcon fontSize="small" />
+              </IconButton>
+            </Box>
           ) : (
-            <button
+            <Button
               onClick={() => {
                 setTitleInput(design.title);
                 setIsEditingTitle(true);
               }}
-              className="flex items-center gap-1.5 px-2 py-1 rounded hover:bg-gray-100 transition-colors"
+              endIcon={<EditIcon sx={{ fontSize: 14, opacity: 0.5 }} />}
+              sx={{
+                color: m3.onSurface,
+                textTransform: 'none',
+                fontWeight: 500,
+                borderRadius: 2,
+                '&:hover': { bgcolor: m3.surfaceContainerHigh },
+              }}
             >
-              <span className="text-sm font-medium text-gray-800">{design.title}</span>
-              <Edit3 className="w-3.5 h-3.5 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
-            </button>
+              {design.title}
+            </Button>
           )}
-        </div>
-      </div>
+        </Box>
 
-      {/* 中间：撤销/重做 + 缩放 */}
-      <div className="flex items-center gap-2">
-        {/* 撤销重做 */}
-        <div className="flex items-center gap-0.5 p-1 bg-gray-50 rounded-lg">
-          <button
-            onClick={undo}
-            disabled={!canUndo}
-            className={`p-1.5 rounded-md transition-colors ${
-              canUndo
-                ? 'text-gray-600 hover:bg-white hover:shadow-sm'
-                : 'text-gray-300 cursor-not-allowed'
-            }`}
-            title="撤销 (Ctrl+Z)"
-          >
-            <Undo2 className="w-4 h-4" />
-          </button>
-          <button
-            onClick={redo}
-            disabled={!canRedo}
-            className={`p-1.5 rounded-md transition-colors ${
-              canRedo
-                ? 'text-gray-600 hover:bg-white hover:shadow-sm'
-                : 'text-gray-300 cursor-not-allowed'
-            }`}
-            title="重做 (Ctrl+Shift+Z)"
-          >
-            <Redo2 className="w-4 h-4" />
-          </button>
-        </div>
+        <Box sx={{ flex: 1 }} />
 
-        {/* 缩放控制 */}
-        <div className="flex items-center gap-1 p-1 bg-gray-50 rounded-lg">
-          <button
-            onClick={handleZoomOut}
-            className="p-1.5 rounded-md text-gray-600 hover:bg-white hover:shadow-sm transition-colors"
-            title="缩小"
-          >
-            <ZoomOut className="w-4 h-4" />
-          </button>
-          <button
-            onClick={handleZoomReset}
-            className="px-2 py-1 text-xs font-medium text-gray-700 hover:bg-white hover:shadow-sm rounded-md transition-colors min-w-[48px]"
-            title="重置缩放"
+        {/* Undo / Redo */}
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            bgcolor: m3.surfaceContainerHigh,
+            borderRadius: 3,
+            p: 0.5,
+          }}
+        >
+          <Tooltip title="撤销 (Ctrl+Z)">
+            <span>
+              <IconButton size="small" onClick={undo} disabled={!canUndo}>
+                <UndoIcon fontSize="small" />
+              </IconButton>
+            </span>
+          </Tooltip>
+          <Tooltip title="重做 (Ctrl+Shift+Z)">
+            <span>
+              <IconButton size="small" onClick={redo} disabled={!canRedo}>
+                <RedoIcon fontSize="small" />
+              </IconButton>
+            </span>
+          </Tooltip>
+        </Box>
+
+        {/* Zoom controls */}
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            bgcolor: m3.surfaceContainerHigh,
+            borderRadius: 3,
+            p: 0.5,
+            ml: 1,
+          }}
+        >
+          <Tooltip title="缩小">
+            <IconButton size="small" onClick={() => setZoom(Math.max(zoom - 0.1, 0.1))}>
+              <ZoomOutIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+          <Button
+            size="small"
+            onClick={() => setZoom(1)}
+            sx={{
+              minWidth: 52,
+              color: m3.onSurface,
+              fontWeight: 500,
+              fontSize: '0.75rem',
+              borderRadius: 2,
+            }}
           >
             {Math.round(zoom * 100)}%
-          </button>
-          <button
-            onClick={handleZoomIn}
-            className="p-1.5 rounded-md text-gray-600 hover:bg-white hover:shadow-sm transition-colors"
-            title="放大"
-          >
-            <ZoomIn className="w-4 h-4" />
-          </button>
-        </div>
-      </div>
+          </Button>
+          <Tooltip title="放大">
+            <IconButton size="small" onClick={() => setZoom(Math.min(zoom + 0.1, 4))}>
+              <ZoomInIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        </Box>
 
-      {/* 右侧：分享/导出 */}
-      <div className="flex items-center gap-2">
-        <button className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">
-          <Share2 className="w-4 h-4" />
-          分享
-        </button>
-        <button
-          onClick={() => setShowExportModal(true)}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-lg transition-colors"
+        <Divider orientation="vertical" flexItem sx={{ mx: 1.5, borderColor: m3.outlineVariant }} />
+
+        {/* Actions */}
+        <Button
+          variant="outlined"
+          startIcon={<ShareIcon />}
+          sx={{
+            borderColor: m3.outline,
+            color: m3.onSurface,
+            borderRadius: 5,
+            mr: 1,
+          }}
         >
-          <Download className="w-4 h-4" />
+          分享
+        </Button>
+        <Button
+          variant="contained"
+          startIcon={<FileDownloadIcon />}
+          onClick={() => setShowExportModal(true)}
+          sx={{ borderRadius: 5 }}
+        >
           导出
-        </button>
-      </div>
-    </header>
+        </Button>
+      </Toolbar>
+    </AppBar>
   );
 }

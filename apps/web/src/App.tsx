@@ -1,3 +1,6 @@
+import Box from '@mui/material/Box';
+import Paper from '@mui/material/Paper';
+import Typography from '@mui/material/Typography';
 import { Header } from '@/components/layout/Header';
 import { LeftSidebar } from '@/components/layout/LeftSidebar';
 import { RightPanel } from '@/components/layout/RightPanel';
@@ -5,52 +8,72 @@ import { DesignCanvas } from '@/components/canvas/DesignCanvas';
 import { ExportModal } from '@/components/modals/ExportModal';
 import { useDesignStore } from '@/store/useDesignStore';
 import { useUIStore } from '@/store/useUIStore';
+import { m3 } from '@/theme/m3Theme';
 
 function App() {
   const { design } = useDesignStore();
   const { showExportModal } = useUIStore();
 
   return (
-    <div className="flex flex-col h-screen w-screen overflow-hidden bg-gray-100">
-      {/* 顶部 Header */}
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100vh',
+        width: '100vw',
+        overflow: 'hidden',
+        bgcolor: m3.surface,
+      }}
+    >
       <Header />
 
-      {/* 主体区域 */}
-      <div className="flex flex-1 overflow-hidden">
-        {/* 左侧边栏 */}
+      <Box sx={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
         <LeftSidebar />
 
-        {/* 中间画布区域 */}
-        <main className="flex-1 flex flex-col overflow-hidden">
-          {/* DesignCanvas 组件 */}
-          <div className="flex-1 overflow-hidden">
+        <Box
+          component="main"
+          sx={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}
+        >
+          <Box sx={{ flex: 1, overflow: 'hidden', bgcolor: m3.surfaceContainerLow }}>
             <DesignCanvas />
-          </div>
+          </Box>
 
-          {/* 底部状态栏 */}
-          <div className="flex items-center justify-between px-4 py-1.5 bg-white border-t border-gray-200 text-xs text-gray-500 flex-shrink-0">
-            <div className="flex items-center gap-4">
-              <span>
+          <Paper
+            elevation={0}
+            square
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              px: 2,
+              py: 0.75,
+              bgcolor: m3.surfaceContainer,
+              borderTop: `1px solid ${m3.outlineVariant}`,
+              flexShrink: 0,
+            }}
+          >
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Typography variant="caption" color="text.secondary">
                 {design.width} × {design.height}
-              </span>
-              <span className="text-gray-400">|</span>
-              <span>{design.elements.length} 个元素</span>
-            </div>
-            <div className="flex items-center gap-4">
-              <span className="text-gray-400">
-                {Math.round(design.zoom * 100)}%
-              </span>
-            </div>
-          </div>
-        </main>
+              </Typography>
+              <Typography variant="caption" color="text.disabled">
+                |
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                {design.elements.length} 个元素
+              </Typography>
+            </Box>
+            <Typography variant="caption" color="text.secondary">
+              {Math.round(design.zoom * 100)}%
+            </Typography>
+          </Paper>
+        </Box>
 
-        {/* 右侧面板 */}
         <RightPanel />
-      </div>
+      </Box>
 
-      {/* 导出弹窗 */}
       {showExportModal && <ExportModal />}
-    </div>
+    </Box>
   );
 }
 

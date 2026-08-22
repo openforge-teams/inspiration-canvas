@@ -27,3 +27,4 @@ packages/*/dist
 *.swp
 *.swo
 *.tsbuildinfo
+apps/*/vite.config.d.ts

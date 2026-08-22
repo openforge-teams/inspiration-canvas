@@ -1,8 +1,16 @@
 import { useState } from 'react';
-import { Search } from 'lucide-react';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+import TextField from '@mui/material/TextField';
+import InputAdornment from '@mui/material/InputAdornment';
+import Chip from '@mui/material/Chip';
+import Card from '@mui/material/Card';
+import CardActionArea from '@mui/material/CardActionArea';
+import SearchIcon from '@mui/icons-material/Search';
 import { useDesignStore } from '@/store/useDesignStore';
 import type { Template } from '@inspiration/shared';
 import { generateId } from '@inspiration/shared';
+import { m3 } from '@/theme/m3Theme';
 
 const MOCK_TEMPLATES: Template[] = [
   {
@@ -27,7 +35,7 @@ const MOCK_TEMPLATES: Template[] = [
         props: {
           x: 50, y: 200, width: 650, height: 120,
           rotation: 0, opacity: 1, visible: true, locked: false,
-          text: '新品上市', fontFamily: 'Inter, sans-serif', fontSize: 72,
+          text: '新品上市', fontFamily: 'Roboto, sans-serif', fontSize: 72,
           fontWeight: 700, fontStyle: 'normal', textDecoration: 'none',
           textAlign: 'center', fill: '#FFFFFF', lineHeight: 1.2, letterSpacing: 2, padding: 0,
         },
@@ -140,130 +148,142 @@ export function TemplatePanel() {
   const { applyTemplate } = useDesignStore();
   const [activeCategory, setActiveCategory] = useState('全部');
 
-  const filteredTemplates = activeCategory === '全部'
-    ? MOCK_TEMPLATES
-    : MOCK_TEMPLATES.filter((t) => t.category === activeCategory);
-
-  const handleApplyTemplate = (template: Template) => {
-    applyTemplate(template);
-  };
+  const filteredTemplates =
+    activeCategory === '全部'
+      ? MOCK_TEMPLATES
+      : MOCK_TEMPLATES.filter((t) => t.category === activeCategory);
 
   const getTemplateBgStyle = (template: Template) => {
     const bg = template.background;
-    if (bg.type === 'solid') {
-      return { backgroundColor: bg.color || '#FFFFFF' };
-    }
+    if (bg.type === 'solid') return { backgroundColor: bg.color || '#FFFFFF' };
     if (bg.type === 'gradient' && bg.gradient) {
-      const stops = bg.gradient.colors
-        .map((c) => `${c.color} ${c.offset * 100}%`)
-        .join(', ');
-      return {
-        background: `linear-gradient(${bg.gradient.angle}deg, ${stops})`,
-      };
+      const stops = bg.gradient.colors.map((c) => `${c.color} ${c.offset * 100}%`).join(', ');
+      return { background: `linear-gradient(${bg.gradient.angle}deg, ${stops})` };
     }
-    return { backgroundColor: '#F3F4F6' };
+    return { backgroundColor: m3.surfaceContainerHigh };
   };
 
   return (
-    <div className="h-full flex flex-col bg-white">
-      {/* 搜索和分类 */}
-      <div className="p-4 border-b border-gray-100 space-y-3">
-        <div className="relative">
-          <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
-          <input
-            type="text"
-            placeholder="搜索模板..."
-            className="w-full h-9 pl-9 pr-3 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-primary-500 bg-gray-50"
-          />
-        </div>
-        <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
+    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', bgcolor: m3.surfaceContainerLowest }}>
+      <Box sx={{ p: 2, borderBottom: `1px solid ${m3.outlineVariant}` }}>
+        <TextField
+          fullWidth
+          placeholder="搜索模板..."
+          size="small"
+          slotProps={{
+            input: {
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon fontSize="small" color="action" />
+                </InputAdornment>
+              ),
+            },
+          }}
+        />
+        <Box sx={{ display: 'flex', gap: 0.75, overflowX: 'auto', mt: 1.5, pb: 0.5 }}>
           {CATEGORIES.map((cat) => (
-            <button
+            <Chip
               key={cat}
+              label={cat}
+              size="small"
               onClick={() => setActiveCategory(cat)}
-              className={`flex-shrink-0 px-3 py-1.5 text-xs font-medium rounded-full transition-colors ${
-                activeCategory === cat
-                  ? 'bg-primary-500 text-white'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              }`}
-            >
-              {cat}
-            </button>
+              color={activeCategory === cat ? 'primary' : 'default'}
+              variant={activeCategory === cat ? 'filled' : 'outlined'}
+              sx={{ flexShrink: 0 }}
+            />
           ))}
-        </div>
-      </div>
+        </Box>
+      </Box>
 
-      {/* 模板网格 */}
-      <div className="flex-1 overflow-y-auto p-4">
-        <div className="grid grid-cols-2 gap-3">
+      <Box sx={{ flex: 1, overflowY: 'auto', p: 2 }}>
+        <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1.5 }}>
           {filteredTemplates.map((template) => (
-            <div
-              key={template.id}
-              className="group cursor-pointer"
-              onClick={() => handleApplyTemplate(template)}
-            >
-              {/* 预览区域 */}
-              <div
-                className="relative w-full rounded-lg border border-gray-200 overflow-hidden hover:border-primary-400 hover:shadow-md transition-all"
-                style={{
-                  aspectRatio: `${template.width} / ${template.height}`,
-                  ...getTemplateBgStyle(template),
-                }}
-              >
-                {/* 模板元素预览 */}
-                {template.elements.slice(0, 3).map((el) => {
-                  const scaleX = 100 / template.width;
-                  const scaleY = 100 / template.height;
-                  return (
-                    <div
-                      key={el.id}
-                      className="absolute"
-                      style={{
-                        left: `${el.props.x * scaleX}%`,
-                        top: `${el.props.y * scaleY}%`,
-                        width: `${el.props.width * scaleX}%`,
-                        height: `${el.props.height * scaleY}%`,
-                        color: (el.props as any).fill || '#333',
-                        fontSize: '8px',
-                        overflow: 'hidden',
+            <Box key={template.id}>
+              <Card variant="outlined" sx={{ overflow: 'hidden' }}>
+                <CardActionArea onClick={() => applyTemplate(template)}>
+                  <Box
+                    sx={{
+                      position: 'relative',
+                      aspectRatio: `${template.width} / ${template.height}`,
+                      ...getTemplateBgStyle(template),
+                    }}
+                  >
+                    {template.elements.slice(0, 3).map((el) => {
+                      const scaleX = 100 / template.width;
+                      const scaleY = 100 / template.height;
+                      return (
+                        <Box
+                          key={el.id}
+                          sx={{
+                            position: 'absolute',
+                            left: `${el.props.x * scaleX}%`,
+                            top: `${el.props.y * scaleY}%`,
+                            width: `${el.props.width * scaleX}%`,
+                            height: `${el.props.height * scaleY}%`,
+                            color: (el.props as any).fill || m3.onSurface,
+                            fontSize: 8,
+                            overflow: 'hidden',
+                          }}
+                        >
+                          {el.type === 'text' && (
+                            <Typography variant="caption" noWrap>
+                              {(el.props as any).text}
+                            </Typography>
+                          )}
+                        </Box>
+                      );
+                    })}
+                    <Box
+                      sx={{
+                        position: 'absolute',
+                        inset: 0,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        bgcolor: 'rgba(0,0,0,0)',
+                        transition: 'background-color 0.2s',
+                        '&:hover': { bgcolor: 'rgba(0,0,0,0.2)' },
+                        '&:hover .use-label': { opacity: 1 },
                       }}
                     >
-                      {el.type === 'text' && (
-                        <span className="line-clamp-2">{(el.props as any).text}</span>
-                      )}
-                    </div>
-                  );
-                })}
-
-                {/* Hover 遮罩 */}
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
-                  <span className="opacity-0 group-hover:opacity-100 bg-white text-gray-800 text-xs font-medium px-3 py-1.5 rounded-full shadow-md transition-opacity">
-                    使用模板
-                  </span>
-                </div>
-
-                {/* 尺寸标签 */}
-                <div className="absolute bottom-1.5 right-1.5 bg-black/40 text-white text-[10px] px-1.5 py-0.5 rounded">
-                  {template.width}×{template.height}
-                </div>
-              </div>
-
-              {/* 模板信息 */}
-              <div className="mt-2">
-                <h4 className="text-sm font-medium text-gray-800 truncate">
-                  {template.name}
-                </h4>
-                <div className="flex items-center justify-between mt-0.5">
-                  <span className="text-xs text-gray-400">{template.category}</span>
-                  <span className="text-xs text-gray-400">
-                    {template.usageCount.toLocaleString()} 使用
-                  </span>
-                </div>
-              </div>
-            </div>
+                      <Chip
+                        className="use-label"
+                        label="使用模板"
+                        size="small"
+                        sx={{ opacity: 0, transition: 'opacity 0.2s', bgcolor: m3.surfaceContainerLowest }}
+                      />
+                    </Box>
+                    <Chip
+                      label={`${template.width}×${template.height}`}
+                      size="small"
+                      sx={{
+                        position: 'absolute',
+                        bottom: 4,
+                        right: 4,
+                        height: 20,
+                        fontSize: 10,
+                        bgcolor: 'rgba(0,0,0,0.5)',
+                        color: '#fff',
+                      }}
+                    />
+                  </Box>
+                </CardActionArea>
+              </Card>
+              <Typography variant="body2" sx={{ fontWeight: 500 }} noWrap>
+                {template.name}
+              </Typography>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                <Typography variant="caption" color="text.secondary">
+                  {template.category}
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  {template.usageCount.toLocaleString()} 使用
+                </Typography>
+              </Box>
+            </Box>
           ))}
-        </div>
-      </div>
-    </div>
+        </Box>
+      </Box>
+    </Box>
   );
 }
